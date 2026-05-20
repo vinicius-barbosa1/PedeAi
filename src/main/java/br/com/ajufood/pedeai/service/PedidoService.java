@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class PedidoService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Transactional(readOnly = true)
     public PedidoResponseDTO obterPorId(int id){
         PedidoModel pedidoModel =  pedidoRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(
@@ -32,6 +34,7 @@ public class PedidoService {
         return modelMapper.map(pedidoModel, PedidoResponseDTO.class);
     }
 
+    @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obterTodos(){
         return pedidoRepository.findAll()
                 .stream()
@@ -39,6 +42,7 @@ public class PedidoService {
                 .toList();
     }
 
+    @Transactional
     public PedidoResponseDTO salvar(PedidoRequestDTO pedidoRequestDTO){
 
         try{
@@ -54,6 +58,7 @@ public class PedidoService {
         }
     }
 
+    @Transactional
     public PedidoResponseDTO atualizar(int id, PedidoRequestDTO pedidoRequestDTO){
         try {
             PedidoModel pedidoExistente = pedidoRepository.findById(id)
@@ -75,6 +80,7 @@ public class PedidoService {
         }
     }
 
+    @Transactional
     public void excluir(int id){
         try {
             PedidoModel pedidoExistente = pedidoRepository.findById(id)
