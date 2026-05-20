@@ -2,6 +2,7 @@ package br.com.ajufood.pedeai.rest.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class ProdutoRequestDTO {
   @Length(max = 256, message = "A descrição deve ter no máximo 256 caracteres")
   private String descricao;
 
+  @Positive
   @NotNull(message = "O preço é obrigatório.")
   private BigDecimal preco;
 
