@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.model.ItensPedidoModel;
 import br.com.ajufood.pedeai.repositoty.ItensPedidoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ItensPedidoRequestDTO;
@@ -47,11 +49,21 @@ public class ItensPedidoService {
     @Transactional
     public ItensPedidoResponseDTO salvar(ItensPedidoRequestDTO itensPedidoDTO) {
 
-        ItensPedidoModel itensPedido = modelMapper.map(itensPedidoDTO, ItensPedidoModel.class);
-        itensPedido.setSubTotal(calcularSubTotal(itensPedido.getQuantidade(), itensPedido.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.
-        ItensPedidoModel itensPedidoSalvo = itensPedidoRepository.save(itensPedido);
+        try{
 
-        return modelMapper.map(itensPedidoSalvo, ItensPedidoResponseDTO.class);
+            ItensPedidoModel itensPedido = modelMapper.map(itensPedidoDTO, ItensPedidoModel.class);
+            itensPedido.setSubTotal(calcularSubTotal(itensPedido.getQuantidade(), itensPedido.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.
+            ItensPedidoModel itensPedidoSalvo = itensPedidoRepository.save(itensPedido);
+
+            return modelMapper.map(itensPedidoSalvo, ItensPedidoResponseDTO.class);
+
+        }catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException(
+                    "Erro de integridade ao salvar o item do pedido " + itensPedidoDTO.getPedidoId() + ".", e
+            );
+        }
+
+       
     }
 
     @Transactional
