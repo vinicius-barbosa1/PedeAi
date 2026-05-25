@@ -15,7 +15,7 @@ import br.com.ajufood.pedeai.rest.dto.request.FormaPagamentoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.FormaPagamentoResponseDTO;
 
 @Service
-public class FomaPagamentoService {
+public class FormaPagamentoService {
     
     @Autowired
     private FormaPagamentoRepository formaPagamentoRepository;

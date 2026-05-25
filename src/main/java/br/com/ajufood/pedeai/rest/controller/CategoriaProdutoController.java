@@ -46,7 +46,7 @@ public class CategoriaProdutoController {
     @PostMapping
     public ResponseEntity<CategoriaProdutoResponseDTO> salvar(@Valid @RequestBody CategoriaProdutoRequestDTO CategoriaProdutoRequestDTO) {
         CategoriaProdutoResponseDTO categoriaProdutoSalva = categoriaProdutoService.salvar(CategoriaProdutoRequestDTO);
-        return ResponseEntity.ok(categoriaProdutoSalva);
+        return ResponseEntity.status(201).body(categoriaProdutoSalva);
     }
 
     @Operation(summary = "Atualiza uma categoria de produto existente")
@@ -54,7 +54,7 @@ public class CategoriaProdutoController {
     public ResponseEntity<CategoriaProdutoResponseDTO> atualizar(@Valid @PathVariable int id, 
         @Valid @RequestBody CategoriaProdutoRequestDTO categoriaProdutoRequestDTO) {
         CategoriaProdutoResponseDTO categoriaProdutoAtualizada = categoriaProdutoService.atualizar(id, categoriaProdutoRequestDTO);
-        return ResponseEntity.ok(categoriaProdutoAtualizada);
+        return ResponseEntity.status(200).body(categoriaProdutoAtualizada);
     }
 
 
