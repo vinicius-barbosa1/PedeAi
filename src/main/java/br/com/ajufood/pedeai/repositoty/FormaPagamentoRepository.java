@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FormaPagamentoRepository extends JpaRepository<FormaPagamentoModel, Integer> {
-    Optional<FormaPagamentoModel> findByNome(String nome);
+    Optional<FormaPagamentoModel> findByNomeIgnoreCase(String nome);
 }

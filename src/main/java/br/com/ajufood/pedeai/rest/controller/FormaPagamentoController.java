@@ -1,12 +1,6 @@
 package br.com.ajufood.pedeai.rest.controller;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,7 +12,6 @@ import br.com.ajufood.pedeai.rest.dto.request.FormaPagamentoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.FormaPagamentoResponseDTO;
 import br.com.ajufood.pedeai.service.FormaPagamentoService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
@@ -39,8 +32,8 @@ public class FormaPagamentoController {
     }
 
     @Operation(summary = "Busca uma forma de pagamento pelo nome")
-    @GetMapping("/{nome}")
-    public ResponseEntity<FormaPagamentoResponseDTO> obterPorNome(@PathVariable String nome) {
+    @GetMapping("/nome")
+    public ResponseEntity<FormaPagamentoResponseDTO> obterPorNome(@RequestParam String nome) {
         FormaPagamentoResponseDTO formaPagamentoResponseDTO = formaPagamentoService.obterPorNome(nome);
         return ResponseEntity.ok(formaPagamentoResponseDTO);
     }
@@ -56,7 +49,7 @@ public class FormaPagamentoController {
     @Operation(summary = "Salva uma nova forma de pagamento")
     @ApiResponse(responseCode = "201", description = "Forma de pagamento criada com sucesso")
     @PostMapping
-    public ResponseEntity<FormaPagamentoResponseDTO> salvar(@Valid @RequestBody FormaPagamentoRequestDTO formaPagamentoRequestDTO) {
+    public ResponseEntity<FormaPagamentoResponseDTO> salvar(@RequestBody @Valid FormaPagamentoRequestDTO formaPagamentoRequestDTO) {
         FormaPagamentoResponseDTO formaPagamentoSalva = formaPagamentoService.salvar(formaPagamentoRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(formaPagamentoSalva);
     }
