@@ -1,7 +1,6 @@
 package br.com.ajufood.pedeai.rest.controller;
 
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
-import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
 import br.com.ajufood.pedeai.service.ProdutoService;
 import io.swagger.v3.oas.annotations.Operation;
