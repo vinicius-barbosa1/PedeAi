@@ -3,6 +3,7 @@ package br.com.ajufood.pedeai.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,7 +33,7 @@ public class ItensPedidoService {
     public ItensPedidoResponseDTO obterPorId(long id) {
 
         ItensPedidoModel itensPedido = itensPedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item do pedido com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
                 
 
         return modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
@@ -70,7 +71,7 @@ public class ItensPedidoService {
     public ItensPedidoResponseDTO atualizar(long id, ItensPedidoRequestDTO itensPedidoDTO) {
 
         ItensPedidoModel itensPedidoExistente = itensPedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item do pedido com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
 
         modelMapper.map(itensPedidoDTO, itensPedidoExistente);
         itensPedidoExistente.setSubTotal(calcularSubTotal(itensPedidoExistente.getQuantidade(), itensPedidoExistente.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.
@@ -82,7 +83,7 @@ public class ItensPedidoService {
     @Transactional
     public void deletar(long id) {
         ItensPedidoModel itensPedidoExistente = itensPedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item do pedido com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
 
         itensPedidoRepository.delete(itensPedidoExistente);
     }
