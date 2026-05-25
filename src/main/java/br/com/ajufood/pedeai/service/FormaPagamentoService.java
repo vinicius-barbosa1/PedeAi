@@ -2,6 +2,7 @@ package br.com.ajufood.pedeai.service;
 
 import java.util.List;
 
+import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,7 +16,7 @@ import br.com.ajufood.pedeai.rest.dto.request.FormaPagamentoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.FormaPagamentoResponseDTO;
 
 @Service
-public class FomaPagamentoService {
+public class FormaPagamentoService {
     
     @Autowired
     private FormaPagamentoRepository formaPagamentoRepository;
@@ -26,15 +27,15 @@ public class FomaPagamentoService {
     @Transactional(readOnly = true)
     public FormaPagamentoResponseDTO obterPorId(int id) {
         FormaPagamentoModel formaPagamento = formaPagamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Forma de pagamento com ID " + id + " não encontrada."));
+                .orElseThrow(() -> new ObjectNotFoundException("Forma de pagamento com ID " + id + " não encontrada."));
 
         return modelMapper.map(formaPagamento, FormaPagamentoResponseDTO.class);
     }
 
     @Transactional(readOnly = true)
     public FormaPagamentoResponseDTO obterPorNome(String nome) {
-        FormaPagamentoModel formaPagamento = formaPagamentoRepository.findByNome(nome)
-                .orElseThrow(() -> new RuntimeException("Forma de pagamento com nome " + nome + " não encontrada."));
+        FormaPagamentoModel formaPagamento = formaPagamentoRepository.findByNomeIgnoreCase(nome)
+                .orElseThrow(() -> new ObjectNotFoundException("Forma de pagamento com nome " + nome + " não encontrada."));
 
         return modelMapper.map(formaPagamento, FormaPagamentoResponseDTO.class);
     }
@@ -66,7 +67,7 @@ public class FomaPagamentoService {
     public FormaPagamentoResponseDTO atualizar(int id, FormaPagamentoRequestDTO formaPagamentoRequestDTO){
         try {
             FormaPagamentoModel formaPagamentoExistente = formaPagamentoRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Forma de pagamento com ID " + id + " não encontrada."));
+                    .orElseThrow(() -> new ObjectNotFoundException("Forma de pagamento com ID " + id + " não encontrada."));
 
             modelMapper.map(formaPagamentoRequestDTO, formaPagamentoExistente);
             FormaPagamentoModel formaPagamentoAtualizada = formaPagamentoRepository.save(formaPagamentoExistente);
