@@ -2,6 +2,7 @@ package br.com.ajufood.pedeai.service;
 
 import java.util.List;
 
+import br.com.ajufood.pedeai.exception.BusinessRuleException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +49,21 @@ public class FormaPagamentoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByNome(String nome) {
+        return formaPagamentoRepository.existsByNomeIgnoreCase(nome);
+    }
+
     @Transactional
     public FormaPagamentoResponseDTO salvar(FormaPagamentoRequestDTO formaPagamentoRequestDTO) {
       
         try{
             FormaPagamentoModel formaPagamento = modelMapper.map(formaPagamentoRequestDTO, FormaPagamentoModel.class);
+
+            if(existsByNome(formaPagamento.getNome())) {
+                throw new BusinessRuleException("Já existe uma forma de pagamento com esse nome " + formaPagamentoRequestDTO.getNome());
+            }
+
             FormaPagamentoModel formaPagamentoSalva = formaPagamentoRepository.save(formaPagamento);
             return modelMapper.map(formaPagamentoSalva, FormaPagamentoResponseDTO.class);
 
