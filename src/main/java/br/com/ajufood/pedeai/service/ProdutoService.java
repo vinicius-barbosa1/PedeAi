@@ -6,6 +6,7 @@ import br.com.ajufood.pedeai.model.ProdutoModel;
 import br.com.ajufood.pedeai.repositoty.ProdutoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,6 +35,16 @@ public class ProdutoService {
     }
 
     @Transactional(readOnly = true)
+    public ProdutoResponseDTO obterPorNome(String nome){
+        ProdutoModel produto = produtoRepository.findByNomeIgnoreCase(nome)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        "Produto com o nome " + nome + " não encontrado."
+                ));
+
+        return modelMapper.map(produto, ProdutoResponseDTO.class);
+    }
+
+    @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> obterTodos(){
         return produtoRepository.findAll()
                 .stream()
@@ -41,10 +52,20 @@ public class ProdutoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByNome(String nome) {
+        return produtoRepository.existsByNome(nome);
+    }
+
     @Transactional
     public ProdutoResponseDTO salvar(ProdutoRequestDTO produtoRequestDTO){
         try{
             ProdutoModel produto = modelMapper.map(produtoRequestDTO, ProdutoModel.class);
+
+            if(existsByNome(produto.getNome())){
+                throw new RuntimeException("Já existe um produto com o nome " + produto.getNome());
+            }
+
             return modelMapper.map(produtoRepository.save(produto), ProdutoResponseDTO.class);
 
         }catch (DataIntegrityViolationException e){
