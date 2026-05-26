@@ -1,6 +1,7 @@
 package br.com.ajufood.pedeai.rest.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,6 @@ public class EnderecoRequestDTO {
   @Length(min = 8, max = 8, message = "O cep deverá ter obrigatoriamente 8 caracteres")
   private String cep;
 
-  @NotBlank(message = "ClienteID é obrigatório.")
+  @NotNull(message = "ClienteID é obrigatório.")
   private int clienteId;
 }

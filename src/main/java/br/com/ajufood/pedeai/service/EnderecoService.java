@@ -33,16 +33,6 @@ public class EnderecoService {
         return modelMapper.map(enderecoModel, EnderecoResponseDTO.class);
     }
 
-    @Transactional(readOnly = true)
-    public EnderecoResponseDTO obterPorCep(String cep){
-        EnderecoModel enderecoModel = enderecoRepository.findByCep(cep)
-                .orElseThrow(() -> new ObjectNotFoundException(
-                        "Endereço com cep: " + cep + " não encontrado."
-                ));
-
-        return modelMapper.map(enderecoModel, EnderecoResponseDTO.class);
-    }
-
 
     @Transactional(readOnly = true)
     public List<EnderecoResponseDTO> obterTodos(){
@@ -70,7 +60,7 @@ public class EnderecoService {
     }
 
     @Transactional
-    public EnderecoResponseDTO atualizarPorId(int id, EnderecoRequestDTO enderecoRequestDTO){
+    public EnderecoResponseDTO atualizar(int id, EnderecoRequestDTO enderecoRequestDTO){
 
         try{
             EnderecoModel enderecoExistente = enderecoRepository.findById(id)
@@ -88,28 +78,10 @@ public class EnderecoService {
         }
     }
 
-    @Transactional
-    public EnderecoResponseDTO atualizarPorCep(String cep, EnderecoRequestDTO enderecoRequestDTO){
-
-        try{
-            EnderecoModel enderecoExistente = enderecoRepository.findByCep(cep)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "Endereço com o CEP " + cep + " não encontrado."
-                    ));
-
-            modelMapper.map(enderecoRequestDTO, enderecoExistente);
-            EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoExistente);
-            return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
-        }catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException(
-                    "Erro de integridade ao atualizar o endereço " + cep + ".", e
-            );
-        }
-    }
 
 
     @Transactional
-    public void excluirPorId(int id){
+    public void deletar(int id){
         try{
             obterPorId(id);
             enderecoRepository.deleteById(id);
@@ -121,17 +93,5 @@ public class EnderecoService {
 
     }
 
-    @Transactional
-    public void excluirPorCep(String cep){
-        try{
-            obterPorCep(cep);
-            enderecoRepository.deleteByCep(cep);
-        }catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException(
-                    "Não foi possível excluir o endereço, pois ele possui vínculos com outros registros.", e
-            );
-        }
-
-    }
 
 }
