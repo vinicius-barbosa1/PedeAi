@@ -32,8 +32,8 @@ public class FormaPagamentoController {
     }
 
     @Operation(summary = "Busca uma forma de pagamento pelo nome")
-    @GetMapping("/nome")
-    public ResponseEntity<FormaPagamentoResponseDTO> obterPorNome(@RequestParam String nome) {
+    @GetMapping("nome/{nome}")
+    public ResponseEntity<FormaPagamentoResponseDTO> obterPorNome(@PathVariable String nome) {
         FormaPagamentoResponseDTO formaPagamentoResponseDTO = formaPagamentoService.obterPorNome(nome);
         return ResponseEntity.ok(formaPagamentoResponseDTO);
     }
