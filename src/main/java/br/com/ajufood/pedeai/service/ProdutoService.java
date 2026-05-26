@@ -1,5 +1,6 @@
 package br.com.ajufood.pedeai.service;
 
+import br.com.ajufood.pedeai.exception.BusinessRuleException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.ProdutoModel;
@@ -54,7 +55,7 @@ public class ProdutoService {
 
     @Transactional(readOnly = true)
     public boolean existsByNome(String nome) {
-        return produtoRepository.existsByNome(nome);
+        return produtoRepository.existsByNomeIgnoreCase(nome);
     }
 
     @Transactional
@@ -63,7 +64,7 @@ public class ProdutoService {
             ProdutoModel produto = modelMapper.map(produtoRequestDTO, ProdutoModel.class);
 
             if(existsByNome(produto.getNome())){
-                throw new RuntimeException("Já existe um produto com o nome " + produto.getNome());
+                throw new BusinessRuleException("Já existe um produto com o nome " + produto.getNome());
             }
 
             return modelMapper.map(produtoRepository.save(produto), ProdutoResponseDTO.class);

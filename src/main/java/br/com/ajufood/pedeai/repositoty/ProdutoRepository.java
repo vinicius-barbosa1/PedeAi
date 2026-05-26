@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface ProdutoRepository extends JpaRepository<ProdutoModel, Integer> {
     Optional<ProdutoModel> findByNomeIgnoreCase(String nome);
 
-    boolean existsByNome(String nome);
+    boolean existsByNomeIgnoreCase(String nome);
 
 }
