@@ -34,6 +34,12 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.obterTodos());
     }
 
+    @Operation(summary = "Busca um produto pelo nome")
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<ProdutoResponseDTO> obterPorNome(@PathVariable String nome){
+        return ResponseEntity.ok(produtoService.obterPorNome(nome));
+    }
+
     @Operation(summary = "Cadastra um novo produto")
     @ApiResponse(responseCode = "201", description = "Produto criado com sucesso")
     @PostMapping
