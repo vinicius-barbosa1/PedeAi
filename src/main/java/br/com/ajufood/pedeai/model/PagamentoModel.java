@@ -41,5 +41,5 @@ public class PagamentoModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @NotNull(message = "A forma de pagamento é obrigatório.")
   @JoinColumn(name = "formaPagamento", nullable = false)
-  private FormaPagamentoModel formaPagamento;
+  private FormaPagamentoModel formaPagamentoId;
 }

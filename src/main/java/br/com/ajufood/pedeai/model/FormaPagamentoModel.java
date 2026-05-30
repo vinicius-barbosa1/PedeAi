@@ -32,6 +32,6 @@ public class FormaPagamentoModel {
   private String descricao;
 
 
-  @OneToMany(mappedBy = "formaPagamento")
+  @OneToMany(mappedBy = "formaPagamentoId")
   private List<PagamentoModel> pagamentoModel;
 }

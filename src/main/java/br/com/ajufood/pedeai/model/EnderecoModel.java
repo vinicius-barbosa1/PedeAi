@@ -1,11 +1,6 @@
 package br.com.ajufood.pedeai.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -57,7 +52,8 @@ public class EnderecoModel {
   @Length(min = 8, max = 8, message = "O cep deverá ter obrigatoriamente 8 caracteres")
   private String cep;
 
-  @Column(name = "clienteID", nullable = false)
-  @NotNull(message = "ClienteID é obrigatório.")
-  private int clienteId;
+  @ManyToOne(fetch = FetchType.EAGER) //Carrega todos os endereços do cliente de uma vez.
+  @JoinColumn(name = "cliente", nullable = false)
+  @NotNull(message = "Cliente é obrigatório.")
+  private ClienteModel cliente;
 }

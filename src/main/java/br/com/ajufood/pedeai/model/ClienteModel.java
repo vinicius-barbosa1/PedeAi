@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CPF;
 
+import java.util.List;
+
 /**
  * Entidade que representa um cliente no sistema.
  *
@@ -78,4 +80,11 @@ public class ClienteModel {
     @Column(name = "telefone", nullable = false, length = 11)
     @Length(min = 11, max = 11, message = "O telefone deverá ter obrigatoriamente 11 dígitos.")
     private String telefone;
+
+
+    @OneToMany(mappedBy = "cliente") //Cria uma lista de endereços para o cliente
+    private List<EnderecoModel> endereco;
+
+    @OneToMany(mappedBy = "cliente")
+    private List<PedidoModel> pedido;
 }

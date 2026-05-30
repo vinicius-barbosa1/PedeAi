@@ -42,5 +42,5 @@ public class ProdutoModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "categoriaProduto", nullable = false)
   @NotNull(message = "A categoriaID é obrigatória.")
-  private CategoriaProdutoModel categoriaProduto;
+  private CategoriaProdutoModel categoriaProdutoId;
 }
