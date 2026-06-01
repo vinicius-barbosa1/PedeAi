@@ -104,16 +104,19 @@ public class EnderecoService {
     @Transactional
     public void deletar(int id){
         try{
-            EnderecoResponseDTO enderecoResponseDTO = obterPorId(id);
-            EnderecoModel enderecoModel = modelMapper.map(enderecoResponseDTO, EnderecoModel.class);
 
-            ClienteModel cliente = enderecoModel.getCliente();
+            EnderecoModel endereco = enderecoRepository.findById(id)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Endereço com ID " + id + " não encontrado."
+                    ));
 
-            if(cliente != null && cliente.getEnderecos() != null){
-                cliente.getEnderecos().remove(enderecoResponseDTO);
+            ClienteModel cliente = endereco.getCliente();
+
+            if (cliente != null) {
+                cliente.getEnderecos().remove(endereco);
             }
 
-            enderecoRepository.deleteById(id);
+            enderecoRepository.delete(endereco);
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
