@@ -53,7 +53,7 @@ public class EnderecoModel {
   private String cep;
 
   @ManyToOne(fetch = FetchType.EAGER) //Carrega todos os endereços do cliente de uma vez.
-  @JoinColumn(name = "cliente", nullable = false)
+  @JoinColumn(name = "cliente_id", nullable = false)
   @NotNull(message = "Cliente é obrigatório.")
   private ClienteModel cliente;
 }

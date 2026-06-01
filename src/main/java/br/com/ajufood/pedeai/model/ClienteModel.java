@@ -82,9 +82,9 @@ public class ClienteModel {
     private String telefone;
 
 
-    @OneToMany(mappedBy = "cliente") //Cria uma lista de endereços para o cliente
-    private List<EnderecoModel> endereco;
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.EAGER) //Cria uma lista de endereços para o cliente
+    private List<EnderecoModel> enderecos;
 
     @OneToMany(mappedBy = "cliente")
-    private List<PedidoModel> pedido;
+    private List<PedidoModel> pedidos;
 }
