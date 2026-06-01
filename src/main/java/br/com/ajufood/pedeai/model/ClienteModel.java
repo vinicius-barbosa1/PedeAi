@@ -82,9 +82,9 @@ public class ClienteModel {
     private String telefone;
 
 
-    @OneToMany(mappedBy = "cliente", fetch = FetchType.EAGER) //Cria uma lista de endereços para o cliente
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true) //Cria uma lista de endereços para o cliente
     private List<EnderecoModel> enderecos;
 
-    @OneToMany(mappedBy = "cliente")
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoModel> pedidos;
 }

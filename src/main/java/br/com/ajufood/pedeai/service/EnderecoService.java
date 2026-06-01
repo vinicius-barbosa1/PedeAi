@@ -104,8 +104,17 @@ public class EnderecoService {
     @Transactional
     public void deletar(int id){
         try{
-            obterPorId(id);
+            EnderecoResponseDTO enderecoResponseDTO = obterPorId(id);
+            EnderecoModel enderecoModel = modelMapper.map(enderecoResponseDTO, EnderecoModel.class);
+
+            ClienteModel cliente = enderecoModel.getCliente();
+
+            if(cliente != null && cliente.getEnderecos() != null){
+                cliente.getEnderecos().remove(enderecoResponseDTO);
+            }
+
             enderecoRepository.deleteById(id);
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Não foi possível excluir o endereço, pois ele possui vínculos com outros registros.", e
