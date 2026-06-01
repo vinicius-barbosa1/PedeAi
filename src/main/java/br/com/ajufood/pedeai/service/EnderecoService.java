@@ -36,7 +36,7 @@ public class EnderecoService {
                 ));
 
         EnderecoResponseDTO dto = modelMapper.map(enderecoModel, EnderecoResponseDTO.class);
-        dto.setClienteId(enderecoModel.getCliente().getId());
+        dto.setClienteId(enderecoModel.getCliente().getId()); // Adiciona o id do cliente diretamente.
         return dto;
     }
 
@@ -66,11 +66,11 @@ public class EnderecoService {
 
             EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoModel);
 
-            EnderecoResponseDTO response = modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
-            response.setClienteId(enderecoSalvo.getCliente().getId());
-
-
-            return response;
+           return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+//            response.setClienteId(enderecoSalvo.getCliente().getId());
+//
+//
+//            return response;
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
