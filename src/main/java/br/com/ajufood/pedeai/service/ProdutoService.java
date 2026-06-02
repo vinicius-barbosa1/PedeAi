@@ -1,6 +1,7 @@
 package br.com.ajufood.pedeai.service;
 
 import br.com.ajufood.pedeai.exception.BusinessRuleException;
+import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.CategoriaProdutoModel;
@@ -100,11 +101,22 @@ public class ProdutoService {
     public ProdutoResponseDTO atualizar(int id, ProdutoRequestDTO produtoRequestDTO){
 
         try{
+            CategoriaProdutoResponseDTO categoriaProdutoResponseDTO = categoriaProdutoService.obterPorId(produtoRequestDTO.getCategoriaProdutoId());
+            CategoriaProdutoModel categoriaProdutoModel = modelMapper.map(categoriaProdutoResponseDTO, CategoriaProdutoModel.class);
+
 
             ProdutoModel produtoExistente = produtoRepository.findById(id)
                     .orElseThrow(() -> new ObjectNotFoundException("Produto com o ID " + id + " não encontrado."));
 
+            int idNovaCategoria = produtoRequestDTO.getCategoriaProdutoId();
+
+            if(!categoriaProdutoService.validarIdExiste(idNovaCategoria)){
+                throw new ObjectNotFoundException("Erro ao atualizar: a categoria com ID " + idNovaCategoria + " não existe.");
+            }
+
             modelMapper.map(produtoRequestDTO, produtoExistente);
+            produtoExistente.setCategoriaProduto(categoriaProdutoModel);
+
 
 
             ProdutoModel produtoSalvo = produtoRepository.save(produtoExistente);
