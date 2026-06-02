@@ -76,10 +76,22 @@ public class PedidoService {
             pedidoModel.setCliente(cliente); //Adiciona o Cliente diretamente via setter para não dar erro.
             pedidoModel.setEndereco(endereco); //Adiciona o Endereço diretamente via setter para não dar erro.
 
+            List<Integer> enderecosValidos = cliente.getEnderecos()
+                                .stream()
+                                .map(EnderecoModel::getId)
+                                .toList();
+
+            if(!enderecosValidos.contains(pedidoRequestDTO.getEnderecoEntregaId())){
+                throw new ObjectNotFoundException("O endereço de entrega não pertence ao cliente.");
+            }
+
             PedidoModel pedidoSalvo =  pedidoRepository.save(pedidoModel);
 
-            return modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            PedidoResponseDTO response = modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            response.setClienteId(pedidoSalvo.getCliente().getId()); // setta para retornar o id do cliente no response.
+            response.setEnderecoEntregaId(pedidoSalvo.getEndereco().getId()); // setta para retornar o id do endereço no response.
 
+            return response;
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -100,8 +112,14 @@ public class PedidoService {
 
             pedidoExistente.setId(id);
 
+
             PedidoModel pedidoSalvo = pedidoRepository.save(pedidoExistente);
-            return modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+
+            PedidoResponseDTO response = modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            response.setClienteId(pedidoSalvo.getCliente().getId()); // setta para retornar o id do cliente no response.
+            response.setEnderecoEntregaId(pedidoSalvo.getEndereco().getId()); // setta para retornar o id do endereço no response.
+
+            return response;
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -126,7 +144,7 @@ public class PedidoService {
             }
 
             // Condição para evitar NullPointerException
-            if ("FINALIZADO".equals(pedidoExistente.getStatus())) {
+            if ("FINALIZADO".equalsIgnoreCase(pedidoExistente.getStatus())) {
                 throw new ConstraintException("Impossível cancelar/excluir um pedido já finalizado.");
             }
 
