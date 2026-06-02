@@ -40,7 +40,7 @@ public class ProdutoModel {
   private boolean disponivel;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "categoriaProduto", nullable = false)
-  @NotNull(message = "A categoriaID é obrigatória.")
-  private CategoriaProdutoModel categoriaProdutoId;
+  @JoinColumn(name = "categoriaProduto_id", nullable = false)
+  @NotNull(message = "A categoria é obrigatória.")
+  private CategoriaProdutoModel categoriaProduto;
 }
