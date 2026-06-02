@@ -31,6 +31,6 @@ public class CategoriaProdutoModel {
   @Length(min = 10, max = 256, message = "A descrição deverá ter no mínimo 10 caracteres e no máximo 256 caracteres")
   private String descricao;
 
-  @OneToMany(mappedBy = "categoriaProduto")
+  @OneToMany(mappedBy = "categoriaProduto", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ProdutoModel> produtos;
 }
