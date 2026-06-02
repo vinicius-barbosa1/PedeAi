@@ -66,11 +66,11 @@ public class EnderecoService {
 
             EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoModel);
 
-           return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
-//            response.setClienteId(enderecoSalvo.getCliente().getId());
-//
-//
-//            return response;
+           EnderecoResponseDTO response = modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+           response.setClienteId(enderecoSalvo.getCliente().getId());
+
+
+           return response;
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -89,9 +89,19 @@ public class EnderecoService {
                             "Endereço com o ID " + id + " não encontrado."
                     ));
 
+            int idNovoCliente = enderecoRequestDTO.getClienteId();
+            if (idNovoCliente != enderecoExistente.getCliente().getId()) {
+               throw new ObjectNotFoundException("Erro ao atualizar: o cliente com ID " + idNovoCliente + " não codiz com o ID do cliente atual.");
+            }
+
             modelMapper.map(enderecoRequestDTO, enderecoExistente);
             EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoExistente);
-            return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+                       
+            EnderecoResponseDTO response = modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+            response.setClienteId(enderecoSalvo.getCliente().getId());
+
+            return response;
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao atualizar o endereço " + id + ".", e

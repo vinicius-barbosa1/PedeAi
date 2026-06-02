@@ -1,7 +1,5 @@
 package br.com.ajufood.pedeai.service;
 
-import br.com.ajufood.pedeai.exception.BusinessRuleException;
-import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.CategoriaProdutoModel;
@@ -10,7 +8,6 @@ import br.com.ajufood.pedeai.repositoty.ProdutoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.CategoriaProdutoResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
