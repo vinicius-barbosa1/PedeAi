@@ -32,6 +32,6 @@ public class FormaPagamentoModel {
   private String descricao;
 
 
-  @OneToMany(mappedBy = "formaPagamentoId")
-  private List<PagamentoModel> pagamentoModel;
+  @OneToMany(mappedBy = "formaPagamento", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<PagamentoModel> pagamentosModels;
 }

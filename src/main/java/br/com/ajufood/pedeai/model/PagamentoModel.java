@@ -38,7 +38,7 @@ public class PagamentoModel {
   @Column(name = "pedidoID", nullable = false)
   private int pedidoId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @NotNull(message = "A forma de pagamento é obrigatório.")
   @JoinColumn(name = "formaPagamento", nullable = false)
   private FormaPagamentoModel formaPagamentoId;
