@@ -12,13 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.model.ItensPedidoModel;
+import br.com.ajufood.pedeai.model.PedidoModel;
+import br.com.ajufood.pedeai.model.ProdutoModel;
 import br.com.ajufood.pedeai.repositoty.ItensPedidoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ItensPedidoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ItensPedidoResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
 
 
 @Service
 public class ItensPedidoService {
+
+    @Autowired
+    private ProdutoService produtoService; // Para validar o produto e obter o preço unitário, se necessário.
+
+    @Autowired
+    private PedidoService pedidoService; // Para validar o pedido ao qual o item pertence.
     
     @Autowired
     private ItensPedidoRepository itensPedidoRepository;
@@ -35,15 +45,22 @@ public class ItensPedidoService {
         ItensPedidoModel itensPedido = itensPedidoRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
                 
-
-        return modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
+        ItensPedidoResponseDTO dto = modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
+        dto.setPedidoId(itensPedido.getPedidoId().getId()); // Adiciona o id do pedido diretamente.
+        dto.setProdutoId(itensPedido.getProdutoId().getId()); // Adiciona o id do produto diretamente.
+        return dto;
     }
 
     @Transactional(readOnly = true)
     public List<ItensPedidoResponseDTO> obterTodos(){
         return itensPedidoRepository.findAll()
                 .stream()
-                .map(itensPedido -> modelMapper.map(itensPedido, ItensPedidoResponseDTO.class))
+                .map(itensPedido -> {
+                    ItensPedidoResponseDTO dto = modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
+                    dto.setPedidoId(itensPedido.getPedidoId().getId());
+                    dto.setProdutoId(itensPedido.getProdutoId().getId());
+                    return dto;
+                })
                 .toList();
     }
 
@@ -51,12 +68,24 @@ public class ItensPedidoService {
     public ItensPedidoResponseDTO salvar(ItensPedidoRequestDTO itensPedidoDTO) {
 
         try{
+            PedidoResponseDTO pedidoResponseDTO = pedidoService.obterPorId(itensPedidoDTO.getPedidoId());
+            PedidoModel pedidoModel = modelMapper.map(pedidoResponseDTO, PedidoModel.class);
+
+            ProdutoResponseDTO produtoResponseDTO = produtoService.obterPorId(itensPedidoDTO.getProdutoId());
+            ProdutoModel produtoModel = modelMapper.map(produtoResponseDTO, ProdutoModel.class);
 
             ItensPedidoModel itensPedido = modelMapper.map(itensPedidoDTO, ItensPedidoModel.class);
             itensPedido.setSubTotal(calcularSubTotal(itensPedido.getQuantidade(), itensPedido.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.
+            itensPedido.setPedidoId(pedidoModel); // Associa o item ao pedido.
+            itensPedido.setProdutoId(produtoModel); // Associa o item ao produto.
+            
             ItensPedidoModel itensPedidoSalvo = itensPedidoRepository.save(itensPedido);
 
-            return modelMapper.map(itensPedidoSalvo, ItensPedidoResponseDTO.class);
+            ItensPedidoResponseDTO itensPedidoResponse = modelMapper.map(itensPedidoSalvo, ItensPedidoResponseDTO.class);
+            itensPedidoResponse.setPedidoId(pedidoModel.getId()); // Adiciona o id do pedido diretamente.
+            itensPedidoResponse.setProdutoId(produtoModel.getId()); // Adiciona o id do produto diretamente.
+
+            return itensPedidoResponse;
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -72,6 +101,7 @@ public class ItensPedidoService {
 
         ItensPedidoModel itensPedidoExistente = itensPedidoRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
+
 
         modelMapper.map(itensPedidoDTO, itensPedidoExistente);
         itensPedidoExistente.setSubTotal(calcularSubTotal(itensPedidoExistente.getQuantidade(), itensPedidoExistente.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.

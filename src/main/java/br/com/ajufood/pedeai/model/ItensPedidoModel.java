@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -45,10 +46,10 @@ public class ItensPedidoModel {
   private BigDecimal subTotal;
 
   @NotNull(message = "O ID do pedido é obrigatório.")
-  @Column(name = "pedidoID", nullable = false)
-  private int pedidoId;
+  @JoinColumn(name = "pedido_id", nullable = false)
+  private PedidoModel pedidoId;
 
   @NotNull(message = "O ID do produto é obrigatório.")
-  @Column(name = "produtoID", nullable = false)
-  private int produtoId;
+  @JoinColumn(name = "produto_id", nullable = false)
+  private ProdutoModel produtoId;
 }

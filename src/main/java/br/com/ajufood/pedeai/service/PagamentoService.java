@@ -41,7 +41,7 @@ public class PagamentoService {
                         "Pedido com o ID " + id + " não encontrado."
                 ));
         PagamentoResponseDTO dto = modelMapper.map(pagamento, PagamentoResponseDTO.class);
-        dto.setFormaPagamentoId(pagamento.getFormaPagamento().getId());
+        dto.setFormaPagamentoId(pagamento.getFormaPagamentoId().getId());
         dto.setPedidoId(pagamento.getPedidoId());
 
         return dto;
@@ -54,7 +54,7 @@ public class PagamentoService {
                 .stream()
                 .map(pagamento -> {
                     PagamentoResponseDTO dto = modelMapper.map(pagamento, PagamentoResponseDTO.class);
-                    dto.setFormaPagamentoId(pagamento.getFormaPagamento().getId());
+                    dto.setFormaPagamentoId(pagamento.getFormaPagamentoId().getId());
                     dto.setPedidoId(pagamento.getPedidoId());
                     return dto;
                 })
@@ -73,7 +73,7 @@ public class PagamentoService {
             PagamentoModel pagamentoModel = modelMapper.map(pagamentoRequestDTO, PagamentoModel.class);
 
             pagamentoModel.setPedidoId(pedidoModel.getId()); // adiciona o id manualmente após o mapeamento dos outros atributos.
-            pagamentoModel.setFormaPagamento(formaPagamentoModel); // adiciona a forma de pagamento manualmente após o mapeamento dos outros atributos.
+            pagamentoModel.setFormaPagamentoId(formaPagamentoModel); // adiciona a forma de pagamento manualmente após o mapeamento dos outros atributos.
 
             PagamentoModel pagamentoSalvo = pagamentoRepository.save(pagamentoModel);
 
@@ -103,7 +103,7 @@ public class PagamentoService {
 
             modelMapper.map(pagamentoRequestDTO, pagamentoExistente);
 
-            pagamentoExistente.setFormaPagamento(formaPagamentoModel);
+            pagamentoExistente.setFormaPagamentoId(formaPagamentoModel);
             pagamentoExistente.setPedidoId(pedidoModel.getId());
 
             PagamentoModel pagamentoAtualizado = pagamentoRepository.save(pagamentoExistente);
@@ -126,7 +126,7 @@ public class PagamentoService {
                             "Pagamento com o ID " + id + " não encontrado."
                     ));
 
-            FormaPagamentoModel formaPagamentoModel = pagamentoExistente.getFormaPagamento(); //pega a forma de pagamento que está no pagamento existente
+            FormaPagamentoModel formaPagamentoModel = pagamentoExistente.getFormaPagamentoId(); //pega a forma de pagamento que está no pagamento existente
 
             if(formaPagamentoModel != null){ // verifica se é diferente de nulo
                 formaPagamentoModel.getPagamentosModels().remove(pagamentoExistente); // deleta da lista em FormaPagamento
