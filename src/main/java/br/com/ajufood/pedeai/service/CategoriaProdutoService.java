@@ -97,4 +97,8 @@ public class CategoriaProdutoService {
         throw new ConstraintException("Já exite uma categoria com este nome: " + categoria.getNome() + ".");
     }
   }
+
+  public boolean validarIdExiste(int id){
+      return categoriaProdutoRepository.existsById(id); // Retorna true se encotrar a categoria
+  }
 }

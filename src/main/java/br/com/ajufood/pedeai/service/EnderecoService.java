@@ -2,9 +2,11 @@ package br.com.ajufood.pedeai.service;
 
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
+import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.repositoty.EnderecoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.EnderecoResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ import java.util.List;
 public class EnderecoService {
 
     @Autowired
+    private ClienteService clienteService;
+    
+    @Autowired
     private EnderecoRepository enderecoRepository;
 
     @Autowired
@@ -30,7 +35,9 @@ public class EnderecoService {
                         "Endereço com ID " + id + " não encontrado."
                 ));
 
-        return modelMapper.map(enderecoModel, EnderecoResponseDTO.class);
+        EnderecoResponseDTO dto = modelMapper.map(enderecoModel, EnderecoResponseDTO.class);
+        dto.setClienteId(enderecoModel.getCliente().getId()); // Adiciona o id do cliente diretamente.
+        return dto;
     }
 
 
@@ -38,7 +45,11 @@ public class EnderecoService {
     public List<EnderecoResponseDTO> obterTodos(){
         return enderecoRepository.findAll()
                 .stream()
-                .map(endereco -> modelMapper.map(endereco, EnderecoResponseDTO.class))
+                .map(endereco -> {
+                    EnderecoResponseDTO dto = modelMapper.map(endereco, EnderecoResponseDTO.class);
+                    dto.setClienteId(endereco.getCliente().getId());
+                    return dto;
+                })
                 .toList();
     }
 
@@ -46,14 +57,24 @@ public class EnderecoService {
     public EnderecoResponseDTO salvar(EnderecoRequestDTO enderecoRequestDTO){
 
         try{
+            ClienteResponseDTO clienteResponseDTO = clienteService.obterPorId(enderecoRequestDTO.getClienteId());
+            ClienteModel clienteModel = modelMapper.map(clienteResponseDTO, ClienteModel.class);
+
+
             EnderecoModel enderecoModel = modelMapper.map(enderecoRequestDTO, EnderecoModel.class);
+            enderecoModel.setCliente(clienteModel);
+
             EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoModel);
 
-            return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+           EnderecoResponseDTO response = modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+           response.setClienteId(enderecoSalvo.getCliente().getId());
+
+
+           return response;
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
-                    "Erro de integridade ao salvar o endereço " + enderecoRequestDTO.getEndereco() + ".", e
+                    "Erro de integridade ao salvar o endereço " + enderecoRequestDTO.getClienteId() + ".", e
             );
         }
 
@@ -68,9 +89,19 @@ public class EnderecoService {
                             "Endereço com o ID " + id + " não encontrado."
                     ));
 
+            int idNovoCliente = enderecoRequestDTO.getClienteId();
+            if (idNovoCliente != enderecoExistente.getCliente().getId()) {
+               throw new ObjectNotFoundException("Erro ao atualizar: o cliente com ID " + idNovoCliente + " não codiz com o ID do cliente atual.");
+            }
+
             modelMapper.map(enderecoRequestDTO, enderecoExistente);
             EnderecoModel enderecoSalvo = enderecoRepository.save(enderecoExistente);
-            return modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+                       
+            EnderecoResponseDTO response = modelMapper.map(enderecoSalvo, EnderecoResponseDTO.class);
+            response.setClienteId(enderecoSalvo.getCliente().getId());
+
+            return response;
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao atualizar o endereço " + id + ".", e
@@ -83,8 +114,20 @@ public class EnderecoService {
     @Transactional
     public void deletar(int id){
         try{
-            obterPorId(id);
-            enderecoRepository.deleteById(id);
+
+            EnderecoModel endereco = enderecoRepository.findById(id)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Endereço com ID " + id + " não encontrado."
+                    ));
+
+            ClienteModel cliente = endereco.getCliente();
+
+            if (cliente != null) {
+                cliente.getEnderecos().remove(endereco);
+            }
+
+            enderecoRepository.delete(endereco);
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Não foi possível excluir o endereço, pois ele possui vínculos com outros registros.", e
