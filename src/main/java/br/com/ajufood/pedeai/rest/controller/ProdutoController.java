@@ -63,5 +63,13 @@ public class ProdutoController {
         return ResponseEntity.noContent().build();
     }
 
+    // UC 01 - Semana 01 -
+    @Operation(summary = "Lista todos os produtos disponíveis (com filtro opcional)")
+    @GetMapping("/disponivel")
+    public ResponseEntity<List<ProdutoResponseDTO>> ListarProdutosPorDisponibilidade(@RequestParam(value = "categoriaProdutoID", required = false) Integer categoriaProdutoId){
+        List<ProdutoResponseDTO> produtos = produtoService.ListarProdutosPorDisponibilidade(categoriaProdutoId);
+        return ResponseEntity.ok(produtos);
+    }
+
 
 }

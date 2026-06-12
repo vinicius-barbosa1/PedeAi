@@ -11,9 +11,11 @@ import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -146,6 +148,30 @@ public class ProdutoService {
         }catch (DataIntegrityViolationException e){
             throw new DataIntegrityException("Erro de integridade ao excluir o produto.", e);
         }
+    }
+    
+    // UC 01 - Semana 01 - Fácil
+    @Transactional(readOnly = true)
+    public List<ProdutoResponseDTO> ListarProdutosPorDisponibilidade(Integer categoriaProdutoId){
+
+//        if(!categoriaProdutoService.validarIdExiste(categoriaProdutoId)){
+//            return new ArrayList<>();
+//        }
+
+        return produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId)
+                .stream()
+                .map(produto -> modelMapper.map(produto, ProdutoResponseDTO.class))
+                .toList();
+
+//        List<ProdutoResponseDTO> produtosDTO = produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId)
+//                .stream()
+//                .map(produto -> modelMapper.map(produto, ProdutoResponseDTO.class))
+//                .toList();
+//
+////        if(categoriaProdutoId == 0){ // Verificar se retorna 0 por padrão caso o parâmetro não seja informado.
+////            return produtosDTO;
+////         }
+//        return produtosDTO;
     }
 
 }
