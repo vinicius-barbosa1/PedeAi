@@ -46,8 +46,8 @@ public class ItensPedidoService {
                 .orElseThrow(() -> new ObjectNotFoundException("Item do pedido com ID " + id + " não encontrado."));
                 
         ItensPedidoResponseDTO dto = modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
-        dto.setPedidoId(itensPedido.getPedidoId().getId()); // Adiciona o id do pedido diretamente.
-        dto.setProdutoId(itensPedido.getProdutoId().getId()); // Adiciona o id do produto diretamente.
+        dto.setPedidoId(itensPedido.getPedido().getId()); // Adiciona o id do pedido diretamente.
+        dto.setProdutoId(itensPedido.getProduto().getId()); // Adiciona o id do produto diretamente.
         return dto;
     }
 
@@ -57,8 +57,8 @@ public class ItensPedidoService {
                 .stream()
                 .map(itensPedido -> {
                     ItensPedidoResponseDTO dto = modelMapper.map(itensPedido, ItensPedidoResponseDTO.class);
-                    dto.setPedidoId(itensPedido.getPedidoId().getId());
-                    dto.setProdutoId(itensPedido.getProdutoId().getId());
+                    dto.setPedidoId(itensPedido.getPedido().getId());
+                    dto.setProdutoId(itensPedido.getProduto().getId());
                     return dto;
                 })
                 .toList();
@@ -76,8 +76,8 @@ public class ItensPedidoService {
 
             ItensPedidoModel itensPedido = modelMapper.map(itensPedidoDTO, ItensPedidoModel.class);
             itensPedido.setSubTotal(calcularSubTotal(itensPedido.getQuantidade(), itensPedido.getPrecoUnitario().doubleValue())); //Talvez seja necessário para calcular o subtotal.
-            itensPedido.setPedidoId(pedidoModel); // Associa o item ao pedido.
-            itensPedido.setProdutoId(produtoModel); // Associa o item ao produto.
+            itensPedido.setPedido(pedidoModel); // Associa o item ao pedido.
+            itensPedido.setProduto(produtoModel); // Associa o item ao produto.
             
             ItensPedidoModel itensPedidoSalvo = itensPedidoRepository.save(itensPedido);
 
