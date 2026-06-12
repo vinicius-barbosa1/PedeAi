@@ -34,9 +34,10 @@ public class PagamentoModel {
   @Column(name = "dataHora", nullable = false)
   private LocalDateTime dataHora;
 
-  @NotNull(message = "O ID do pedido é obrigatório.")
-  @Column(name = "pedidoID", nullable = false)
-  private int pedidoId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @NotNull(message = "O pedido é obrigatório.")
+  @JoinColumn(name = "pedido_id", nullable = false)
+  private PedidoModel pedido;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @NotNull(message = "A forma de pagamento é obrigatório.")

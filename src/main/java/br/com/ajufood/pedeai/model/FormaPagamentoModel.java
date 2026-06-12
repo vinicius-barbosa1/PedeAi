@@ -31,7 +31,8 @@ public class FormaPagamentoModel {
   @Length(min = 10, max = 256, message = "A descrição deverá ter no mínimo 10 caracteres e no máximo 256 caracteres")
   private String descricao;
 
+  @ManyToOne
+  @JoinColumn(name = "forma_pagamento_id", nullable = false)
+  private FormaPagamentoModel formaPagamento;
 
-  @OneToMany(mappedBy = "formaPagamento", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<PagamentoModel> pagamentosModels;
 }
