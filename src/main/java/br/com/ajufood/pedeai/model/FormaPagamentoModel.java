@@ -1,17 +1,14 @@
 package br.com.ajufood.pedeai.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.List;
 
 @Entity
 @Table(name = "formaPagamento")
@@ -33,4 +30,9 @@ public class FormaPagamentoModel {
   @Column(name = "descricao", length = 256)
   @Length(min = 10, max = 256, message = "A descrição deverá ter no mínimo 10 caracteres e no máximo 256 caracteres")
   private String descricao;
+
+  @ManyToOne
+  @JoinColumn(name = "forma_pagamento_id", nullable = false)
+  private FormaPagamentoModel formaPagamento;
+
 }

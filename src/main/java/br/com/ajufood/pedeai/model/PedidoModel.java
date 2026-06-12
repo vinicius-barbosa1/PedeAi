@@ -1,11 +1,6 @@
 package br.com.ajufood.pedeai.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -47,11 +42,14 @@ public class PedidoModel {
   @Column(name = "valorTotal", nullable = false, precision = 11, scale = 2)
   private BigDecimal valorTotal;
 
-  @NotNull(message = "O ID do cliente é obrigatório.")
-  @Column(name = "clienteID", nullable = false)
-  private int clienteId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @NotNull(message = "O cliente é obrigatório.")
+  @JoinColumn(name = "cliente_id", nullable = false)
+  private ClienteModel cliente;
 
-  @NotNull(message = "O ID do endereço de entrega é obrigatório.")
-  @Column(name = "enderecoEntregaID", nullable = false)
-  private int enderecoEntregaId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @NotNull(message = "O endereço de entrega é obrigatório.")
+  @JoinColumn(name = "endereco_id", nullable = false)
+  private EnderecoModel endereco;
 }

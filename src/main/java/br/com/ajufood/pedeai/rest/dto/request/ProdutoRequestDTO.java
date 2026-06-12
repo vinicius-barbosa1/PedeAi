@@ -30,6 +30,6 @@ public class ProdutoRequestDTO {
 
   private boolean disponivel;
 
-  @NotNull(message = "A categoriaID é obrigatória.")
+  @NotNull(message = "O id da categoria é obrigatório.")
   private int categoriaProdutoId;
 }

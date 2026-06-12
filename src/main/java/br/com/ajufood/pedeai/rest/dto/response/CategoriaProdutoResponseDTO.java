@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,5 +17,6 @@ public class CategoriaProdutoResponseDTO {
   private int id;
   private String nome;
   private String descricao;
+  private List<ProdutoResponseDTO> produtos;
 
 }

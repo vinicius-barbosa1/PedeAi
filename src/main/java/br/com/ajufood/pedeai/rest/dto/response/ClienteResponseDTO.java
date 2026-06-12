@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 
 /**
  * DTO utilizado para transportar os dados de cliente entre a API e o cliente da aplicação.
@@ -21,4 +23,6 @@ public class ClienteResponseDTO {
     private String cpf;
     private String email;
     private String telefone;
+    private List<EnderecoResponseDTO> enderecos;
+    private List<PedidoResponseDTO> pedidos;
 }

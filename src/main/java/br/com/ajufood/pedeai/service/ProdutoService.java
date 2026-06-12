@@ -1,13 +1,13 @@
 package br.com.ajufood.pedeai.service;
 
-import br.com.ajufood.pedeai.exception.BusinessRuleException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
+import br.com.ajufood.pedeai.model.CategoriaProdutoModel;
 import br.com.ajufood.pedeai.model.ProdutoModel;
 import br.com.ajufood.pedeai.repositoty.ProdutoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.response.CategoriaProdutoResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +23,9 @@ public class ProdutoService {
     private ProdutoRepository produtoRepository;
 
     @Autowired
+    private CategoriaProdutoService categoriaProdutoService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
@@ -32,7 +35,10 @@ public class ProdutoService {
                         "Produto com ID " + id + " não encontrado."
                 ));
 
-        return modelMapper.map(produto, ProdutoResponseDTO.class);
+        ProdutoResponseDTO dto = modelMapper.map(produto, ProdutoResponseDTO.class);
+        dto.setCategoriaProdutoId(produto.getCategoriaProduto().getId());
+
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -42,14 +48,21 @@ public class ProdutoService {
                         "Produto com o nome " + nome + " não encontrado."
                 ));
 
-        return modelMapper.map(produto, ProdutoResponseDTO.class);
+        ProdutoResponseDTO dto = modelMapper.map(produto, ProdutoResponseDTO.class);
+        dto.setNome(produto.getNome());
+
+        return dto;
     }
 
     @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> obterTodos(){
         return produtoRepository.findAll()
                 .stream()
-                .map(produto -> modelMapper.map(produto, ProdutoResponseDTO.class))
+                .map(produto -> {
+                    ProdutoResponseDTO dto = modelMapper.map(produto, ProdutoResponseDTO.class);
+                    dto.setCategoriaProdutoId(produto.getCategoriaProduto().getId());
+                    return dto;
+                })
                 .toList();
     }
 
@@ -61,13 +74,20 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDTO salvar(ProdutoRequestDTO produtoRequestDTO){
         try{
+            CategoriaProdutoResponseDTO categoriaProdutoResponseDTO = categoriaProdutoService.obterPorId(produtoRequestDTO.getCategoriaProdutoId());
+            CategoriaProdutoModel categoriaProdutoModel = modelMapper.map(categoriaProdutoResponseDTO, CategoriaProdutoModel.class);
+
             ProdutoModel produto = modelMapper.map(produtoRequestDTO, ProdutoModel.class);
 
-            if(existsByNome(produto.getNome())){
-                throw new BusinessRuleException("Já existe um produto com o nome " + produto.getNome());
-            }
+//            if(existsByNome(produto.getNome())){ //Talvez tenha que deletar essa validação por que não faz tanto sentido.
+//                throw new BusinessRuleException("Já existe um produto com o nome " + produto.getNome());
+//            }
+//
+            produto.setCategoriaProduto(categoriaProdutoModel);
 
-            return modelMapper.map(produtoRepository.save(produto), ProdutoResponseDTO.class);
+            ProdutoModel produtoSalvo = produtoRepository.save(produto);
+
+            return modelMapper.map(produtoSalvo, ProdutoResponseDTO.class);
 
         }catch (DataIntegrityViolationException e){
             throw new DataIntegrityException("Erro de integridade ao salvar o produto " + produtoRequestDTO.getNome() + ".", e);
@@ -78,15 +98,23 @@ public class ProdutoService {
     public ProdutoResponseDTO atualizar(int id, ProdutoRequestDTO produtoRequestDTO){
 
         try{
-            ProdutoModel produtoAtualizado = modelMapper.map(produtoRequestDTO, ProdutoModel.class);
+            CategoriaProdutoResponseDTO categoriaProdutoResponseDTO = categoriaProdutoService.obterPorId(produtoRequestDTO.getCategoriaProdutoId());
+            CategoriaProdutoModel categoriaProdutoModel = modelMapper.map(categoriaProdutoResponseDTO, CategoriaProdutoModel.class);
+
+
             ProdutoModel produtoExistente = produtoRepository.findById(id)
                     .orElseThrow(() -> new ObjectNotFoundException("Produto com o ID " + id + " não encontrado."));
 
-            produtoExistente.setNome(produtoAtualizado.getNome());
-            produtoExistente.setDescricao(produtoAtualizado.getDescricao());
-            produtoExistente.setPreco(produtoAtualizado.getPreco());
-            produtoExistente.setDisponivel(produtoAtualizado.isDisponivel());
-            produtoExistente.setCategoriaProdutoId(produtoAtualizado.getCategoriaProdutoId());// o id da categoria é realmente necessário? um produto pode trocar de categoria?
+            int idNovaCategoria = produtoRequestDTO.getCategoriaProdutoId();
+
+            if(!categoriaProdutoService.validarIdExiste(idNovaCategoria)){
+                throw new ObjectNotFoundException("Erro ao atualizar: a categoria com ID " + idNovaCategoria + " não existe.");
+            }
+
+            modelMapper.map(produtoRequestDTO, produtoExistente);
+            produtoExistente.setCategoriaProduto(categoriaProdutoModel);
+
+
 
             ProdutoModel produtoSalvo = produtoRepository.save(produtoExistente);
             return modelMapper.map(produtoSalvo, ProdutoResponseDTO.class);
@@ -101,7 +129,18 @@ public class ProdutoService {
     @Transactional
     public void deletar(int id){
         try{
-            obterPorId(id);
+
+            ProdutoModel produto = produtoRepository.findById(id)
+                            .orElseThrow(() -> new ObjectNotFoundException(
+                                    "Produto com ID " + id + " não encontrado."
+                            ));
+
+            CategoriaProdutoModel categoriaProdutoModel = produto.getCategoriaProduto();
+
+            if (categoriaProdutoModel != null){
+                categoriaProdutoModel.getProdutos().remove(produto);
+            }
+
             produtoRepository.deleteById(id);
 
         }catch (DataIntegrityViolationException e){

@@ -2,6 +2,10 @@ package br.com.ajufood.pedeai.service;
 
 import java.util.List;
 
+import br.com.ajufood.pedeai.model.FormaPagamentoModel;
+import br.com.ajufood.pedeai.model.PedidoModel;
+import br.com.ajufood.pedeai.rest.dto.response.FormaPagamentoResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,7 +21,13 @@ import br.com.ajufood.pedeai.rest.dto.response.PagamentoResponseDTO;
 
 @Service
 public class PagamentoService {
-    
+
+    @Autowired
+    private PedidoService pedidoService;
+
+    @Autowired
+    private FormaPagamentoService formaPagamentoService;
+
     @Autowired
     private PagamentoRepository pagamentoRepository;
 
@@ -30,23 +40,45 @@ public class PagamentoService {
                 .orElseThrow(() -> new ObjectNotFoundException(
                         "Pedido com o ID " + id + " não encontrado."
                 ));
-        return modelMapper.map(pagamento, PagamentoResponseDTO.class);
+        PagamentoResponseDTO dto = modelMapper.map(pagamento, PagamentoResponseDTO.class);
+        dto.setFormaPagamentoId(pagamento.getFormaPagamentoId().getId());
+        dto.setPedidoId(pagamento.getPedidoId());
+
+        return dto;
+
     }
 
     @Transactional(readOnly = true)
     public List<PagamentoResponseDTO> obterTodos(){
         return pagamentoRepository.findAll()
                 .stream()
-                .map(pagamento -> modelMapper.map(pagamento, PagamentoResponseDTO.class))
+                .map(pagamento -> {
+                    PagamentoResponseDTO dto = modelMapper.map(pagamento, PagamentoResponseDTO.class);
+                    dto.setFormaPagamentoId(pagamento.getFormaPagamentoId().getId());
+                    dto.setPedidoId(pagamento.getPedidoId());
+                    return dto;
+                })
                 .toList();
     }
 
     @Transactional
     public PagamentoResponseDTO salvar(PagamentoRequestDTO pagamentoRequestDTO) {
         try{
+            PedidoResponseDTO pedidoResponseDTO = pedidoService.obterPorId(pagamentoRequestDTO.getPedidoId());
+            PedidoModel pedidoModel = modelMapper.map(pedidoResponseDTO, PedidoModel.class);
+
+            FormaPagamentoResponseDTO formaPagamentoResponseDTO = formaPagamentoService.obterPorId(pagamentoRequestDTO.getFormaPagamentoId());
+            FormaPagamentoModel formaPagamentoModel = modelMapper.map(formaPagamentoResponseDTO, FormaPagamentoModel.class);
+
             PagamentoModel pagamentoModel = modelMapper.map(pagamentoRequestDTO, PagamentoModel.class);
+
+            pagamentoModel.setPedidoId(pedidoModel.getId()); // adiciona o id manualmente após o mapeamento dos outros atributos.
+            pagamentoModel.setFormaPagamentoId(formaPagamentoModel); // adiciona a forma de pagamento manualmente após o mapeamento dos outros atributos.
+
             PagamentoModel pagamentoSalvo = pagamentoRepository.save(pagamentoModel);
+
             return modelMapper.map(pagamentoSalvo, PagamentoResponseDTO.class);
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao salvar o pagamento do pedido " + pagamentoRequestDTO.getPedidoId() + ".", e
@@ -59,11 +91,21 @@ public class PagamentoService {
 
         try {
             PagamentoModel pagamentoExistente = pagamentoRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(
-                        "Pagamento com o ID " + id + " não encontrado."
-                ));
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Pagamento com o ID " + id + " não encontrado."
+                    ));
+
+            PedidoResponseDTO pedidoResponseDTO = pedidoService.obterPorId(pagamentoRequestDTO.getPedidoId());
+            PedidoModel pedidoModel = modelMapper.map(pedidoResponseDTO, PedidoModel.class);
+
+            FormaPagamentoResponseDTO formaPagamentoResponseDTO = formaPagamentoService.obterPorId(pagamentoRequestDTO.getFormaPagamentoId());
+            FormaPagamentoModel formaPagamentoModel = modelMapper.map(formaPagamentoResponseDTO, FormaPagamentoModel.class);
 
             modelMapper.map(pagamentoRequestDTO, pagamentoExistente);
+
+            pagamentoExistente.setFormaPagamentoId(formaPagamentoModel);
+            pagamentoExistente.setPedidoId(pedidoModel.getId());
+
             PagamentoModel pagamentoAtualizado = pagamentoRepository.save(pagamentoExistente);
 
             return modelMapper.map(pagamentoAtualizado, PagamentoResponseDTO.class);
@@ -79,8 +121,19 @@ public class PagamentoService {
     @Transactional
     public void excluir(int id) {
         try{
-            obterPorId(id);
-            pagamentoRepository.deleteById(id);
+            PagamentoModel pagamentoExistente = pagamentoRepository.findById(id)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Pagamento com o ID " + id + " não encontrado."
+                    ));
+
+            FormaPagamentoModel formaPagamentoModel = pagamentoExistente.getFormaPagamentoId(); //pega a forma de pagamento que está no pagamento existente
+
+            if(formaPagamentoModel != null){ // verifica se é diferente de nulo
+                formaPagamentoModel.getPagamentosModels().remove(pagamentoExistente); // deleta da lista em FormaPagamento
+            }
+
+            pagamentoRepository.deleteById(id); // deleta no banco de dados
+
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao excluir o pagamento com ID " + id + ".", e

@@ -1,11 +1,6 @@
 package br.com.ajufood.pedeai.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -39,11 +34,13 @@ public class PagamentoModel {
   @Column(name = "dataHora", nullable = false)
   private LocalDateTime dataHora;
 
-  @NotNull(message = "O ID do pedido é obrigatório.")
-  @Column(name = "pedidoID", nullable = false)
-  private int pedidoId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @NotNull(message = "O pedido é obrigatório.")
+  @JoinColumn(name = "pedido_id", nullable = false)
+  private PedidoModel pedido;
 
-  @NotNull(message = "O ID da forma de pagamento é obrigatório.")
-  @Column(name = "formaPagamentoID", nullable = false)
-  private int formaPagamentoId;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @NotNull(message = "A forma de pagamento é obrigatório.")
+  @JoinColumn(name = "formaPagamento", nullable = false)
+  private FormaPagamentoModel formaPagamentoId;
 }

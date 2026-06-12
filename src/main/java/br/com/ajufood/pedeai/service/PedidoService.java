@@ -3,9 +3,13 @@ package br.com.ajufood.pedeai.service;
 import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
+import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.PedidoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.EnderecoResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,12 @@ public class PedidoService {
     private PedidoRepository pedidoRepository;
 
     @Autowired
+    private ClienteService clienteService;
+
+    @Autowired
+    private EnderecoService enderecoService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
@@ -31,14 +41,23 @@ public class PedidoService {
                         "Pedido com o ID " + id + " não encontrado."
                 ));
 
-        return modelMapper.map(pedidoModel, PedidoResponseDTO.class);
+        PedidoResponseDTO dto = modelMapper.map(pedidoModel, PedidoResponseDTO.class);
+        dto.setClienteId(pedidoModel.getCliente().getId()); // Adiciona o id do cliente diretamente.
+        dto.setEnderecoEntregaId(pedidoModel.getEndereco().getId()); // Adiciona o id do endereço diretamente.
+
+        return dto;
     }
 
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obterTodos(){
         return pedidoRepository.findAll()
                 .stream()
-                .map(pedido -> modelMapper.map(pedido, PedidoResponseDTO.class))
+                .map(pedido -> {
+                    PedidoResponseDTO dto = modelMapper.map(pedido, PedidoResponseDTO.class);
+                    dto.setClienteId(pedido.getCliente().getId());
+                    dto.setEnderecoEntregaId(pedido.getEndereco().getId());
+                    return dto;
+                })
                 .toList();
     }
 
@@ -46,10 +65,33 @@ public class PedidoService {
     public PedidoResponseDTO salvar(PedidoRequestDTO pedidoRequestDTO){
 
         try{
-            PedidoModel pedidoModel = modelMapper.map(pedidoRequestDTO, PedidoModel.class);
-            PedidoModel pedidoSalvo =  pedidoRepository.save(pedidoModel);
-            return modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            ClienteResponseDTO clienteResponseDTO = clienteService.obterPorId(pedidoRequestDTO.getClienteId());
+            ClienteModel cliente = modelMapper.map(clienteResponseDTO, ClienteModel.class);
 
+            EnderecoResponseDTO enderecoResponseDTO = enderecoService.obterPorId(pedidoRequestDTO.getEnderecoEntregaId());
+            EnderecoModel endereco = modelMapper.map(enderecoResponseDTO, EnderecoModel.class);
+
+
+            PedidoModel pedidoModel = modelMapper.map(pedidoRequestDTO, PedidoModel.class);
+            pedidoModel.setCliente(cliente); //Adiciona o Cliente diretamente via setter para não dar erro.
+            pedidoModel.setEndereco(endereco); //Adiciona o Endereço diretamente via setter para não dar erro.
+
+            List<Integer> enderecosValidos = cliente.getEnderecos()
+                                .stream()
+                                .map(EnderecoModel::getId)
+                                .toList();
+
+            if(!enderecosValidos.contains(pedidoRequestDTO.getEnderecoEntregaId())){
+                throw new ObjectNotFoundException("O endereço de entrega não pertence ao cliente.");
+            }
+
+            PedidoModel pedidoSalvo =  pedidoRepository.save(pedidoModel);
+
+            PedidoResponseDTO response = modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            response.setClienteId(pedidoSalvo.getCliente().getId()); // setta para retornar o id do cliente no response.
+            response.setEnderecoEntregaId(pedidoSalvo.getEndereco().getId()); // setta para retornar o id do endereço no response.
+
+            return response;
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -70,8 +112,14 @@ public class PedidoService {
 
             pedidoExistente.setId(id);
 
+
             PedidoModel pedidoSalvo = pedidoRepository.save(pedidoExistente);
-            return modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+
+            PedidoResponseDTO response = modelMapper.map(pedidoSalvo, PedidoResponseDTO.class);
+            response.setClienteId(pedidoSalvo.getCliente().getId()); // setta para retornar o id do cliente no response.
+            response.setEnderecoEntregaId(pedidoSalvo.getEndereco().getId()); // setta para retornar o id do endereço no response.
+
+            return response;
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
@@ -88,8 +136,15 @@ public class PedidoService {
                             "Pedido com ID " + id + " não encontrado."
                     ));
 
-            // Yoda condition para evitar NullPointerException
-            if ("FINALIZADO".equals(pedidoExistente.getStatus())) {
+            ClienteModel cliente = pedidoExistente.getCliente();
+
+            if(cliente != null){
+                cliente.getPedidos().remove(pedidoExistente);
+                System.out.println("Pedido cancelado com sucesso.");
+            }
+
+            // Condição para evitar NullPointerException
+            if ("FINALIZADO".equalsIgnoreCase(pedidoExistente.getStatus())) {
                 throw new ConstraintException("Impossível cancelar/excluir um pedido já finalizado.");
             }
 
