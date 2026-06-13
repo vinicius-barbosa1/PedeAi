@@ -17,11 +17,12 @@ public interface ProdutoRepository extends JpaRepository<ProdutoModel, Integer> 
 
     // UC 01 - Semana 01 - Fácil
     @Query(value = """
-        SELECT * 
-        FROM produtos p 
+        SELECT p 
+        FROM ProdutoModel p 
+        JOIN p.categoriaProduto cp
         WHERE p.disponivel = true 
-          AND (:categoriaProdutoID IS NULL OR p.categoria_id = :categoriaProdutoID)
-    """, nativeQuery = true)
+          AND (:categoriaProdutoID IS NULL OR cp.id = :categoriaProdutoID)
+    """)
     List<ProdutoModel> ListarProdutosPorDisponibilidade(@Param("categoriaProdutoID") Integer categoriaProdutoID);
 
 }

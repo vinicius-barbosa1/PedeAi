@@ -11,7 +11,6 @@ import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,7 +108,7 @@ public class ProdutoService {
 
             int idNovaCategoria = produtoRequestDTO.getCategoriaProdutoId();
 
-            if(!categoriaProdutoService.validarIdExiste(idNovaCategoria)){
+            if(categoriaProdutoService.validarIdExiste(idNovaCategoria)){
                 throw new ObjectNotFoundException("Erro ao atualizar: a categoria com ID " + idNovaCategoria + " não existe.");
             }
 
@@ -154,24 +153,22 @@ public class ProdutoService {
     @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> ListarProdutosPorDisponibilidade(Integer categoriaProdutoId){
 
-//        if(!categoriaProdutoService.validarIdExiste(categoriaProdutoId)){
-//            return new ArrayList<>();
-//        }
+        List<ProdutoModel> produtoModelList = produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId);
 
-        return produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId)
-                .stream()
-                .map(produto -> modelMapper.map(produto, ProdutoResponseDTO.class))
+        List<ProdutoResponseDTO> produtoResponseDTOList = produtoModelList.stream()
+                .map(p -> {
+                    ProdutoResponseDTO dto = modelMapper.map(p, ProdutoResponseDTO.class);
+
+                    if(p.getCategoriaProduto() != null){
+                        dto.setCategoriaProdutoId(p.getCategoriaProduto().getId());
+                    }
+
+                    return dto;
+                })
                 .toList();
 
-//        List<ProdutoResponseDTO> produtosDTO = produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId)
-//                .stream()
-//                .map(produto -> modelMapper.map(produto, ProdutoResponseDTO.class))
-//                .toList();
-//
-////        if(categoriaProdutoId == 0){ // Verificar se retorna 0 por padrão caso o parâmetro não seja informado.
-////            return produtosDTO;
-////         }
-//        return produtosDTO;
+        return produtoResponseDTOList;
+
     }
 
 }

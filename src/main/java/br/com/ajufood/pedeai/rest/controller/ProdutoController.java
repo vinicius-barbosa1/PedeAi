@@ -66,9 +66,9 @@ public class ProdutoController {
     // UC 01 - Semana 01 -
     @Operation(summary = "Lista todos os produtos disponíveis (com filtro opcional)")
     @GetMapping("/disponivel")
-    public ResponseEntity<List<ProdutoResponseDTO>> ListarProdutosPorDisponibilidade(@RequestParam(value = "categoriaProdutoID", required = false) Integer categoriaProdutoId){
-        List<ProdutoResponseDTO> produtos = produtoService.ListarProdutosPorDisponibilidade(categoriaProdutoId);
-        return ResponseEntity.ok(produtos);
+    public ResponseEntity<List<ProdutoResponseDTO>> ListarProdutosPorDisponibilidade(
+            @RequestParam(value = "categoriaId", required = false) Integer categoriaProdutoId){
+        return ResponseEntity.ok(produtoService.ListarProdutosPorDisponibilidade(categoriaProdutoId));
     }
 
 
