@@ -2,14 +2,15 @@ package br.com.ajufood.pedeai.repositoty;
 
 import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,16 +186,24 @@ public interface ClienteRepository extends JpaRepository<ClienteModel, Integer> 
 
 
     // UC - 02 - Semana 01 - Médio
-    @Query("""
-        SELECT DISTINCT p 
-        FROM Pedido p
-        JOIN FETCH p.endereco e
-        JOIN FETCH p.itens i
-        JOIN FETCH i.produto pr
-        WHERE p.cliente.id = :clienteId
-        AND (:status IS NULL OR LOWER(p.status) = LOWER(:status))
-    """)
-    Page<PedidoModel> buscarHistoricoPorCliente(
+    @Query(value = """
+        SELECT 
+            p.id, p.data_hora, p.valor_total, p.status,
+            e.endereco, e.numero, e.bairro, e.cidade,
+            pr.nome,
+            ip.quantidade, ip.preco_unitario, sub_total
+        FROM pedido p
+        JOIN endereco e
+            ON p.endereco_id = e.id
+        JOIN itens_pedido ip
+            ON p.id = ip.pedido_id
+        JOIN produto pr
+            ON ip.produto_id = pr.id
+        
+        WHERE p.cliente_id = :clienteId
+            AND (:status IS NULL OR LOWER(p.status) = LOWER(:status))   
+    """, nativeQuery = true)
+    Page<PedidoResumoDTO> buscarHistoricoPorCliente(
             @Param("clienteId") Integer clienteId,
             @Param("status") String status,
             Pageable pageable

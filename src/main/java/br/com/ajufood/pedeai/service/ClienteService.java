@@ -4,12 +4,17 @@ import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -156,6 +161,19 @@ public class ClienteService {
                     "Não foi possível excluir o cliente, pois ele possui vínculos com outros registros.", e
             );
         }
+    }
+
+    // UC - 02 - Semana 01 - Médio
+    @Transactional(readOnly = true)
+    public Page<PedidoResumoDTO> buscarHistoricoPorCliente(Integer clienteId, String status, Pageable pageable){
+
+        if(!clienteRepository.existsById(clienteId)){
+            throw new ObjectNotFoundException("O id: " + clienteId + " não existe.");
+        }
+
+        Page<PedidoResumoDTO> paginaPedidos = clienteRepository.buscarHistoricoPorCliente(clienteId, status, pageable);
+
+        return paginaPedidos.map(pedido -> modelMapper.map(pedido, PedidoResumoDTO.class));
     }
 
     /**
