@@ -1,9 +1,13 @@
 package br.com.ajufood.pedeai.repositoty;
 
 import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.PedidoModel;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
+
 
 import java.awt.print.Pageable;
 import java.util.List;
@@ -181,5 +185,18 @@ public interface ClienteRepository extends JpaRepository<ClienteModel, Integer> 
 
 
     // UC - 02 - Semana 01 - Médio
-    Optional<PedidoResumoDTO> HistoricoPedidoCliente(Pageable pageable);
+    @Query("""
+        SELECT DISTINCT p 
+        FROM Pedido p
+        JOIN FETCH p.endereco e
+        JOIN FETCH p.itens i
+        JOIN FETCH i.produto pr
+        WHERE p.cliente.id = :clienteId
+        AND (:status IS NULL OR LOWER(p.status) = LOWER(:status))
+    """)
+    Page<PedidoModel> buscarHistoricoPorCliente(
+            @Param("clienteId") Integer clienteId,
+            @Param("status") String status,
+            Pageable pageable
+    );
 }
