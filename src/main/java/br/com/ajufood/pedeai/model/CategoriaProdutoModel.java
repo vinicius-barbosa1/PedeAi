@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
 import java.util.List;
 
 @Entity
-@Table(name = "categoriaProduto")
+@Table(name = "categoria_produto")
 @Getter
 @Setter
 @AllArgsConstructor

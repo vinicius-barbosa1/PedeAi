@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -107,7 +108,7 @@ public class ProdutoService {
 
             int idNovaCategoria = produtoRequestDTO.getCategoriaProdutoId();
 
-            if(!categoriaProdutoService.validarIdExiste(idNovaCategoria)){
+            if(categoriaProdutoService.validarIdExiste(idNovaCategoria)){
                 throw new ObjectNotFoundException("Erro ao atualizar: a categoria com ID " + idNovaCategoria + " não existe.");
             }
 
@@ -146,6 +147,28 @@ public class ProdutoService {
         }catch (DataIntegrityViolationException e){
             throw new DataIntegrityException("Erro de integridade ao excluir o produto.", e);
         }
+    }
+    
+    // UC 01 - Semana 01 - Fácil
+    @Transactional(readOnly = true)
+    public List<ProdutoResponseDTO> ListarProdutosPorDisponibilidade(Integer categoriaProdutoId){
+
+        List<ProdutoModel> produtoModelList = produtoRepository.ListarProdutosPorDisponibilidade(categoriaProdutoId);
+
+        List<ProdutoResponseDTO> produtoResponseDTOList = produtoModelList.stream()
+                .map(p -> {
+                    ProdutoResponseDTO dto = modelMapper.map(p, ProdutoResponseDTO.class);
+
+                    if(p.getCategoriaProduto() != null){
+                        dto.setCategoriaProdutoId(p.getCategoriaProduto().getId());
+                    }
+
+                    return dto;
+                })
+                .toList();
+
+        return produtoResponseDTOList;
+
     }
 
 }
