@@ -8,12 +8,12 @@ import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.PedidoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
-import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
-import br.com.ajufood.pedeai.rest.dto.response.EnderecoResponseDTO;
-import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,7 +129,7 @@ public class PedidoService {
     }
 
     @Transactional
-    public void excluir(int id){
+    public void excluir(int id) {
         try {
             PedidoModel pedidoExistente = pedidoRepository.findById(id)
                     .orElseThrow(() -> new ObjectNotFoundException(
@@ -138,7 +138,7 @@ public class PedidoService {
 
             ClienteModel cliente = pedidoExistente.getCliente();
 
-            if(cliente != null){
+            if (cliente != null) {
                 cliente.getPedidos().remove(pedidoExistente);
                 System.out.println("Pedido cancelado com sucesso.");
             }
@@ -156,5 +156,4 @@ public class PedidoService {
             );
         }
     }
-
 }

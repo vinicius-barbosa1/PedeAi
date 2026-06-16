@@ -1,9 +1,16 @@
 package br.com.ajufood.pedeai.repositoty;
 
 import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.PedidoModel;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoProjecao;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -177,4 +184,26 @@ public interface ClienteRepository extends JpaRepository<ClienteModel, Integer> 
            FROM cliente
            """, nativeQuery = true)
     Long contarClientesSqlNativo();
+
+
+    // UC - 02 - Semana 01 - Médio
+    @Query(value = """
+    SELECT
+        p.id as id, p.data_hora as dataHora, p.valor_total as valorTotal, p.status as status,
+        e.endereco as endereco, e.numero as numero, e.bairro as bairro, e.cidade as cidade,
+        pr.nome as nome,
+        ip.quantidade as quantidade, ip.preco_unitario as precoUnitario, ip.sub_total as subTotal
+    FROM pedido p
+    JOIN endereco e ON p.endereco_id = e.id
+    JOIN itens_pedido ip ON p.id = ip.pedido_id
+    JOIN produto pr ON ip.produto_id = pr.id
+
+    WHERE p.cliente_id = :clienteId
+        AND (:status IS NULL OR LOWER(p.status) = LOWER(:status))
+""", nativeQuery = true)
+    Page<PedidoResumoProjecao> buscarHistoricoPorCliente(
+            @Param("clienteId") Integer clienteId,
+            @Param("status") String status,
+            Pageable pageable
+    );
 }

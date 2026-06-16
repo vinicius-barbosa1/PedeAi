@@ -2,11 +2,16 @@ package br.com.ajufood.pedeai.rest.controller;
 
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
 import br.com.ajufood.pedeai.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -96,5 +101,24 @@ public class ClienteController {
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         clienteService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // UC 02 - Semana 01 - Médio
+    @Operation(summary = "Busca o histórico de pedidos por cliente")
+    @GetMapping("/{id}/pedidos")
+    public ResponseEntity<Page<PedidoResumoDTO>> buscarHistoricoPorCliente(
+            @PathVariable Integer id,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "pagina", defaultValue = "0") int pagina,
+            @RequestParam(value = "tamanho", defaultValue = "10") int tamanho
+    ){
+        Pageable pageable = PageRequest.of(
+                pagina,
+                tamanho,
+                Sort.by("data_hora").descending()
+        );
+
+        return ResponseEntity.ok(clienteService.buscarHistoricoPorCliente(id, status, pageable));
+
     }
 }
