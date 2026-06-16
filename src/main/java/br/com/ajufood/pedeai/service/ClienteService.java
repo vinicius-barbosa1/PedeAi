@@ -7,8 +7,7 @@ import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
-import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
-import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
+import br.com.ajufood.pedeai.rest.dto.response.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -44,6 +43,9 @@ public class ClienteService {
      */
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private ProdutoService produtoService;
 
     /**
      * Busca um cliente pelo ID.
@@ -164,17 +166,40 @@ public class ClienteService {
     }
 
     // UC - 02 - Semana 01 - Médio
-    @Transactional(readOnly = true)
     public Page<PedidoResumoDTO> buscarHistoricoPorCliente(Integer clienteId, String status, Pageable pageable){
 
         if(!clienteRepository.existsById(clienteId)){
-            throw new ObjectNotFoundException("O id: " + clienteId + " não existe.");
+            throw new ObjectNotFoundException("O id: " + clienteId + " não foi encontrado.");
         }
 
-        Page<PedidoResumoDTO> paginaPedidos = clienteRepository.buscarHistoricoPorCliente(clienteId, status, pageable);
+        Page<PedidoResumoProjecao> paginaProjecao = clienteRepository.buscarHistoricoPorCliente(clienteId, status, pageable);
 
-        return paginaPedidos.map(pedido -> modelMapper.map(pedido, PedidoResumoDTO.class));
+        List<ItemPedidoResumoDTO> listaItemPedido = paginaProjecao.stream()
+                .map(item -> new ItemPedidoResumoDTO(
+                        item.getNome(),
+                        item.getQuantidade(),
+                        item.getPrecoUnitario(),
+                        item.getSubTotal()
+                )).toList();
+
+        Page<PedidoResumoDTO> pedidoResumo = paginaProjecao
+                .map(pedido -> new PedidoResumoDTO(
+                        pedido.getId(),
+                        pedido.getDataHora(),
+                        pedido.getStatus(),
+                        pedido.getValorTotal(),
+                        pedido.getEndereco(),
+                        pedido.getNumero(),
+                        pedido.getBairro(),
+                        pedido.getCidade(),
+                        listaItemPedido
+                        ));
+
+
+        return pedidoResumo;
+
     }
+
 
     /**
      * Valida se CPF ou e-mail já existem antes de cadastrar um novo cliente.
