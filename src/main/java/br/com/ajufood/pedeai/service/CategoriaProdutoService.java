@@ -99,6 +99,6 @@ public class CategoriaProdutoService {
   }
 
   public boolean validarIdExiste(int id){
-      return categoriaProdutoRepository.existsById(id); // Retorna true se encotrar a categoria
+      return !categoriaProdutoRepository.existsById(id); // Retorna true se encotrar a categoria
   }
 }

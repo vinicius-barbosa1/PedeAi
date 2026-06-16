@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
 import java.util.List;
 
 @Entity
-@Table(name = "formaPagamento")
+@Table(name = "forma_pagamento")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,8 +31,8 @@ public class FormaPagamentoModel {
   @Length(min = 10, max = 256, message = "A descrição deverá ter no mínimo 10 caracteres e no máximo 256 caracteres")
   private String descricao;
 
-  @ManyToOne
-  @JoinColumn(name = "forma_pagamento_id", nullable = false)
-  private FormaPagamentoModel formaPagamento;
+//  @ManyToOne
+//  @JoinColumn(name = "formaPagamento", nullable = false)
+//  private List<FormaPagamentoModel> pagamentos;
 
 }

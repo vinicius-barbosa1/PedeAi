@@ -41,6 +41,6 @@ public class PagamentoModel {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @NotNull(message = "A forma de pagamento é obrigatório.")
-  @JoinColumn(name = "formaPagamento", nullable = false)
-  private FormaPagamentoModel formaPagamentoId;
+  @JoinColumn(name = "forma_pagamento_id", nullable = false)
+  private FormaPagamentoModel formaPagamento;
 }
