@@ -1,14 +1,14 @@
 package br.com.ajufood.pedeai.service;
 
-import br.com.ajufood.pedeai.exception.ConstraintException;
-import br.com.ajufood.pedeai.exception.DataIntegrityException;
-import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
+import br.com.ajufood.pedeai.exception.*;
 import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.PedidoRepository;
+import br.com.ajufood.pedeai.rest.dto.projection.RelatorioVendasProjecao;
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.*;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -155,5 +157,24 @@ public class PedidoService {
                     "Não foi possível excluir o pedido, pois ele possui vínculos com outros registros.", e
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<RelatorioVendasResponse> gerarRelatorio(
+            LocalDate dataInicio,
+            LocalDate dataFim) throws BadRequestException {
+
+        if (dataInicio.isAfter(dataFim)) {
+            throw new BadRequestException(
+                    "Data inicial não pode ser maior que data final");
+        }
+
+        List<RelatorioVendasProjecao> dados = pedidoRepository.buscarRelatorio(
+                dataInicio,
+                dataFim);
+
+        return dados.stream()
+                .map(dado -> modelMapper.map(dado, RelatorioVendasResponse.class))
+                .toList();
     }
 }
