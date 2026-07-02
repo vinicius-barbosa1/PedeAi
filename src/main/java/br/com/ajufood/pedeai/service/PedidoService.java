@@ -1,22 +1,24 @@
 package br.com.ajufood.pedeai.service;
 
-import br.com.ajufood.pedeai.exception.ConstraintException;
-import br.com.ajufood.pedeai.exception.DataIntegrityException;
-import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
+import br.com.ajufood.pedeai.exception.*;
 import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.PedidoRepository;
+import br.com.ajufood.pedeai.rest.dto.projection.RelatorioVendasProjecao;
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
-import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
-import br.com.ajufood.pedeai.rest.dto.response.EnderecoResponseDTO;
-import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.*;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -129,7 +131,7 @@ public class PedidoService {
     }
 
     @Transactional
-    public void excluir(int id){
+    public void excluir(int id) {
         try {
             PedidoModel pedidoExistente = pedidoRepository.findById(id)
                     .orElseThrow(() -> new ObjectNotFoundException(
@@ -138,7 +140,7 @@ public class PedidoService {
 
             ClienteModel cliente = pedidoExistente.getCliente();
 
-            if(cliente != null){
+            if (cliente != null) {
                 cliente.getPedidos().remove(pedidoExistente);
                 System.out.println("Pedido cancelado com sucesso.");
             }
@@ -157,4 +159,22 @@ public class PedidoService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<RelatorioVendasResponse> gerarRelatorio(
+            LocalDate dataInicio,
+            LocalDate dataFim) throws BadRequestException {
+
+        if (dataInicio.isAfter(dataFim)) {
+            throw new BadRequestException(
+                    "Data inicial não pode ser maior que data final");
+        }
+
+        List<RelatorioVendasProjecao> dados = pedidoRepository.buscarRelatorio(
+                dataInicio,
+                dataFim);
+
+        return dados.stream()
+                .map(dado -> modelMapper.map(dado, RelatorioVendasResponse.class))
+                .toList();
+    }
 }
