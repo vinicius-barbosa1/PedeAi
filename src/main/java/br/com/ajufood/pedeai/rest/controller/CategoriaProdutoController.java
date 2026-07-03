@@ -43,14 +43,6 @@ public class CategoriaProdutoController {
         return ResponseEntity.ok(categoriaProdutoResponseDTOS);
     }
 
-//    @Operation(summary = "Salva uma nova categoria de produto")
-//    @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso")
-//    @PostMapping
-//    public ResponseEntity<CategoriaProdutoResponseDTO> salvar(@Valid @RequestBody CategoriaProdutoRequestDTO CategoriaProdutoRequestDTO) {
-//        CategoriaProdutoResponseDTO categoriaProdutoSalva = categoriaProdutoService.salvar(CategoriaProdutoRequestDTO);
-//        return ResponseEntity.status(201).body(categoriaProdutoSalva);
-//    }
-
     @Operation(summary = "Atualiza uma categoria de produto existente")
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaProdutoResponseDTO> atualizar(@Valid @PathVariable int id, 

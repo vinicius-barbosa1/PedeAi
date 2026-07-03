@@ -43,20 +43,6 @@ public class CategoriaProdutoService {
       .toList();
   }
 
-//  @Transactional
-//  public CategoriaProdutoResponseDTO salvar(CategoriaProdutoRequestDTO dto) {
-//
-//    try{
-//      CategoriaProdutoModel categoria = modelMapper.map(dto, CategoriaProdutoModel.class);
-//      validarCategoriaNomeExistente(categoria);
-//      CategoriaProdutoModel categoriaNova = categoriaProdutoRepository.save(categoria);
-//      return modelMapper.map(categoriaNova, CategoriaProdutoResponseDTO.class);
-//
-//    }catch (DataIntegrityViolationException e){
-//      throw new DataIntegrityException("Erro de integridade ao ao salvar categoria " + dto.getNome() + ".", e);
-//    }
-//  }
-
   @Transactional
   public CategoriaProdutoResponseDTO atualizar(int id, CategoriaProdutoRequestDTO categoriaDto) {
     try {
