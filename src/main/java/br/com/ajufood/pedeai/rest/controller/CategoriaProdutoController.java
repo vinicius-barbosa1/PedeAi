@@ -2,7 +2,9 @@ package br.com.ajufood.pedeai.rest.controller;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,13 +43,13 @@ public class CategoriaProdutoController {
         return ResponseEntity.ok(categoriaProdutoResponseDTOS);
     }
 
-    @Operation(summary = "Salva uma nova categoria de produto")
-    @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso")
-    @PostMapping
-    public ResponseEntity<CategoriaProdutoResponseDTO> salvar(@Valid @RequestBody CategoriaProdutoRequestDTO CategoriaProdutoRequestDTO) {
-        CategoriaProdutoResponseDTO categoriaProdutoSalva = categoriaProdutoService.salvar(CategoriaProdutoRequestDTO);
-        return ResponseEntity.status(201).body(categoriaProdutoSalva);
-    }
+//    @Operation(summary = "Salva uma nova categoria de produto")
+//    @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso")
+//    @PostMapping
+//    public ResponseEntity<CategoriaProdutoResponseDTO> salvar(@Valid @RequestBody CategoriaProdutoRequestDTO CategoriaProdutoRequestDTO) {
+//        CategoriaProdutoResponseDTO categoriaProdutoSalva = categoriaProdutoService.salvar(CategoriaProdutoRequestDTO);
+//        return ResponseEntity.status(201).body(categoriaProdutoSalva);
+//    }
 
     @Operation(summary = "Atualiza uma categoria de produto existente")
     @PutMapping("/{id}")
@@ -64,5 +66,17 @@ public class CategoriaProdutoController {
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         categoriaProdutoService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Cria uma nova categoria de produto")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso."),
+            @ApiResponse(responseCode = "409", description = "Categoria já existe")
+    })
+    @PostMapping
+    public ResponseEntity<CategoriaProdutoResponseDTO> criarCategoria(@Valid @RequestBody CategoriaProdutoRequestDTO dto){
+        CategoriaProdutoResponseDTO categoria = categoriaProdutoService.cadastrarCategoria(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoria);
     }
 }
