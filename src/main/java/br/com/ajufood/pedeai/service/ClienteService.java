@@ -7,6 +7,8 @@ import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
+import br.com.ajufood.pedeai.repositoty.EnderecoRepository;
+import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.*;
@@ -53,6 +55,8 @@ public class ClienteService {
 //    private EnderecoService enderecoService;
 
 
+    @Autowired
+    private EnderecoRepository enderecoRepository;
 
     /**
      * Busca um cliente pelo ID.
@@ -210,51 +214,38 @@ public class ClienteService {
 
     // Semana 02 - Médio - Cadastrar Cliente com endereço
     @Transactional
-    public ClienteResponseDTO criarClienteComEndereco(ClienteRequestDTO dtoCliente, EnderecoRequestDTO dtoEndereco){
+    public ClienteResponseDTO criarClienteComEndereco(ClienteEnderecoRequestDTO dto){
     // Finalizar colocando apenas um dto pelo parâmetro "ClienteEndereco"...
         try {
-            // salvar(dtoCliente);
-            ClienteModel clienteNovoModel = modelMapper.map(dtoCliente, ClienteModel.class);
-            validarCpfEmailParaCadastro(clienteNovoModel);
 
-            EnderecoModel enderecoModel = modelMapper.map(dtoEndereco, EnderecoModel.class);
+            EnderecoModel enderecoModel = new EnderecoModel();
+            enderecoModel.setEndereco(dto.getEndereco());
+            enderecoModel.setNumero(dto.getNumero());
+            enderecoModel.setComplemento(dto.getComplemento());
+            enderecoModel.setBairro(dto.getBairro());
+            enderecoModel.setCidade(dto.getCidade());
+            enderecoModel.setEstado(dto.getEstado());
+            enderecoModel.setCep(dto.getCep());
 
+            ClienteModel clienteModel = new ClienteModel();
+            clienteModel.setNome(dto.getNome());
+            clienteModel.setCpf(dto.getCpf());
+            clienteModel.setEmail(dto.getEmail());
+            clienteModel.setTelefone(dto.getTelefone());
 
-            enderecoModel.setCliente(clienteNovoModel);
-            clienteNovoModel.setEnderecos(List.of(enderecoModel));
+            ClienteModel clienteSalvo = clienteRepository.save(clienteModel);
 
-            ClienteModel clienteSalvo = clienteRepository.save(clienteNovoModel);
+            enderecoModel.setCliente(clienteSalvo);
 
+            enderecoRepository.save(enderecoModel);
 
             return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
 
         }catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
-                    "Erro de integridade ao salvar o cliente " + dtoCliente.getNome() + ".", e
+                    "Erro de integridade ao salvar o cliente " + dto.getNome() + ".", e
             );
         }
-
-
-
-//        try{
-//            ClienteModel clienteModel = modelMapper.map(dtoCliente, ClienteModel.class);
-//            validarCpfEmailParaCadastro(clienteModel);
-//
-//            // EnderecoResponseDTO enderecoSalvo = enderecoService.salvar(dtoEndereco);
-//            // EnderecoModel enderecoModel = modelMapper.map(enderecoSalvo, EnderecoModel.class);
-//
-//            // clienteModel.setEnderecos(List.of(enderecoModel));
-//            ClienteModel clienteSalvo = clienteRepository.save(clienteModel);
-//
-//            clienteModel.setCpf(mascararCPF(clienteModel.getCpf()));
-//
-//            return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
-//
-//        }catch (DataIntegrityViolationException e) {
-//            throw new DataIntegrityException(
-//                    "Erro de integridade ao salvar o cliente " + dtoCliente.getNome() + ".", e
-//            );
-//        }
     }
 
 

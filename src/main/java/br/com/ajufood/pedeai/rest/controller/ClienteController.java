@@ -2,7 +2,6 @@ package br.com.ajufood.pedeai.rest.controller;
 
 import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
-import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
 import br.com.ajufood.pedeai.service.ClienteService;
