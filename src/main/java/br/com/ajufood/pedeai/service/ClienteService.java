@@ -4,9 +4,11 @@ import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,11 @@ public class ClienteService {
 
     @Autowired
     private ProdutoService produtoService;
+
+//    @Autowired
+//    private EnderecoService enderecoService;
+
+
 
     /**
      * Busca um cliente pelo ID.
@@ -199,6 +206,71 @@ public class ClienteService {
         return pedidoResumo;
 
     }
+
+
+    // Semana 02 - Médio - Cadastrar Cliente com endereço
+    @Transactional
+    public ClienteResponseDTO criarClienteComEndereco(ClienteRequestDTO dtoCliente, EnderecoRequestDTO dtoEndereco){
+    // Finalizar colocando apenas um dto pelo parâmetro "ClienteEndereco"...
+        try {
+            // salvar(dtoCliente);
+            ClienteModel clienteNovoModel = modelMapper.map(dtoCliente, ClienteModel.class);
+            validarCpfEmailParaCadastro(clienteNovoModel);
+
+            EnderecoModel enderecoModel = modelMapper.map(dtoEndereco, EnderecoModel.class);
+
+
+            enderecoModel.setCliente(clienteNovoModel);
+            clienteNovoModel.setEnderecos(List.of(enderecoModel));
+
+            ClienteModel clienteSalvo = clienteRepository.save(clienteNovoModel);
+
+
+            return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
+
+        }catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException(
+                    "Erro de integridade ao salvar o cliente " + dtoCliente.getNome() + ".", e
+            );
+        }
+
+
+
+//        try{
+//            ClienteModel clienteModel = modelMapper.map(dtoCliente, ClienteModel.class);
+//            validarCpfEmailParaCadastro(clienteModel);
+//
+//            // EnderecoResponseDTO enderecoSalvo = enderecoService.salvar(dtoEndereco);
+//            // EnderecoModel enderecoModel = modelMapper.map(enderecoSalvo, EnderecoModel.class);
+//
+//            // clienteModel.setEnderecos(List.of(enderecoModel));
+//            ClienteModel clienteSalvo = clienteRepository.save(clienteModel);
+//
+//            clienteModel.setCpf(mascararCPF(clienteModel.getCpf()));
+//
+//            return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
+//
+//        }catch (DataIntegrityViolationException e) {
+//            throw new DataIntegrityException(
+//                    "Erro de integridade ao salvar o cliente " + dtoCliente.getNome() + ".", e
+//            );
+//        }
+    }
+
+
+
+
+    // Método para mascarar CPF
+    private String mascararCPF(String cpf){
+        StringBuilder sb = new StringBuilder(cpf);
+        sb.insert(3, ".");
+        sb.insert(7, ".");
+        sb.insert(11, "-");
+
+        return sb.toString();
+
+    }
+
 
 
     /**
