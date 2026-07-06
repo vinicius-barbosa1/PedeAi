@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -214,40 +215,40 @@ public class ClienteService {
 
     // Semana 02 - Médio - Cadastrar Cliente com endereço
     @Transactional
-    public ClienteResponseDTO criarClienteComEndereco(ClienteEnderecoRequestDTO dto){
-    // Finalizar colocando apenas um dto pelo parâmetro "ClienteEndereco"...
+    public ClienteResponseDTO criarClienteComEndereco(ClienteEnderecoRequestDTO dto) {
+
         try {
 
-            EnderecoModel enderecoModel = new EnderecoModel();
-            enderecoModel.setEndereco(dto.getEndereco());
-            enderecoModel.setNumero(dto.getNumero());
-            enderecoModel.setComplemento(dto.getComplemento());
-            enderecoModel.setBairro(dto.getBairro());
-            enderecoModel.setCidade(dto.getCidade());
-            enderecoModel.setEstado(dto.getEstado());
-            enderecoModel.setCep(dto.getCep());
+            EnderecoModel endereco = new EnderecoModel();
+            endereco.setEndereco(dto.getEndereco());
+            endereco.setNumero(dto.getNumero());
+            endereco.setComplemento(dto.getComplemento());
+            endereco.setBairro(dto.getBairro());
+            endereco.setCidade(dto.getCidade());
+            endereco.setEstado(dto.getEstado());
+            endereco.setCep(dto.getCep());
 
-            ClienteModel clienteModel = new ClienteModel();
-            clienteModel.setNome(dto.getNome());
-            clienteModel.setCpf(dto.getCpf());
-            clienteModel.setEmail(dto.getEmail());
-            clienteModel.setTelefone(dto.getTelefone());
+            ClienteModel cliente = new ClienteModel();
+            cliente.setNome(dto.getNome());
+            cliente.setCpf(dto.getCpf());
+            cliente.setEmail(dto.getEmail());
+            cliente.setTelefone(dto.getTelefone());
 
-            ClienteModel clienteSalvo = clienteRepository.save(clienteModel);
+            cliente.setEnderecos(new ArrayList<>());
+            cliente.getEnderecos().add(endereco);
 
-            enderecoModel.setCliente(clienteSalvo);
+            endereco.setCliente(cliente);
 
-            enderecoRepository.save(enderecoModel);
+            ClienteModel clienteSalvo = clienteRepository.save(cliente);
 
             return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
 
-        }catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao salvar o cliente " + dto.getNome() + ".", e
             );
         }
     }
-
 
 
 

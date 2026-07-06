@@ -22,7 +22,7 @@ public class ClienteEnderecoRequestDTO {
 
     @NotBlank(message = "O CPF é obrigatório.")
     @CPF(message = "CPF inválido!")
-    @Length(min = 11, max = 11, message = "O CPF deverá ter obrigatoriamente 11 dígitos.")
+    @Length(min = 11, max = 14, message = "O CPF deverá ser mascarado (XXX.XXX.XXX-XX).")
     private String cpf;
 
     @NotBlank(message = "O E-mail é obrigatório.")
