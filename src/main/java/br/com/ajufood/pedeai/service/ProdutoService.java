@@ -5,6 +5,7 @@ import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.CategoriaProdutoModel;
 import br.com.ajufood.pedeai.model.ProdutoModel;
 import br.com.ajufood.pedeai.repositoty.ProdutoRepository;
+import br.com.ajufood.pedeai.rest.dto.request.ProdutoDisponibilidadeRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.CategoriaProdutoResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
@@ -80,10 +81,6 @@ public class ProdutoService {
 
             ProdutoModel produto = modelMapper.map(produtoRequestDTO, ProdutoModel.class);
 
-//            if(existsByNome(produto.getNome())){ //Talvez tenha que deletar essa validação por que não faz tanto sentido.
-//                throw new BusinessRuleException("Já existe um produto com o nome " + produto.getNome());
-//            }
-//
             produto.setCategoriaProduto(categoriaProdutoModel);
 
             ProdutoModel produtoSalvo = produtoRepository.save(produto);
@@ -171,4 +168,18 @@ public class ProdutoService {
 
     }
 
+
+    // UC 07 - Ativar e Desativar Produto
+    @Transactional
+    public ProdutoResponseDTO AtivarEDesativarProduto(int idProduto, ProdutoDisponibilidadeRequestDTO disponivel){
+
+        ProdutoModel produto = produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ObjectNotFoundException("O produto com o id: " + idProduto + " não foi encontrado."));
+
+        produto.setDisponivel(disponivel.disponivel());
+
+    //    produtoRepository.save(produto);
+
+        return modelMapper.map(produto, ProdutoResponseDTO.class);
+    }
 }

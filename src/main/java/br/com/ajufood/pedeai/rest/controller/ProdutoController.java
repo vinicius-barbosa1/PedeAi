@@ -1,5 +1,6 @@
 package br.com.ajufood.pedeai.rest.controller;
 
+import br.com.ajufood.pedeai.rest.dto.request.ProdutoDisponibilidadeRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ProdutoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ProdutoResponseDTO;
 import br.com.ajufood.pedeai.service.ProdutoService;
@@ -71,5 +72,12 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.ListarProdutosPorDisponibilidade(categoriaProdutoId));
     }
 
+    // UC 07 - Ativar e Desativar Produto
+    @Operation(summary = "Ativa ou desativa a disponibilidade de um produto.")
+    @PatchMapping("/{produtoId}/disponibilidade")
+    public ResponseEntity<ProdutoResponseDTO> AtivarEDesativarProduto(
+            @PathVariable int produtoId, @RequestBody @Valid ProdutoDisponibilidadeRequestDTO disponivel){
+        return ResponseEntity.ok(produtoService.AtivarEDesativarProduto(produtoId, disponivel));
+    }
 
 }
