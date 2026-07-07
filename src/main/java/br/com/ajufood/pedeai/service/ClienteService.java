@@ -8,6 +8,7 @@ import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
 import br.com.ajufood.pedeai.repositoty.EnderecoRepository;
+import br.com.ajufood.pedeai.rest.dto.request.ClienteAtualizarDadosRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
@@ -241,13 +242,50 @@ public class ClienteService {
 
             ClienteModel clienteSalvo = clienteRepository.save(cliente);
 
-            return modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
+            ClienteResponseDTO clienteResponseDTO = modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
+            clienteResponseDTO.setCpf(mascararCPF(clienteSalvo.getCpf()));
+            return clienteResponseDTO;
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(
                     "Erro de integridade ao salvar o cliente " + dto.getNome() + ".", e
             );
         }
+    }
+
+
+    // UC 08 - Atualizar Dados do Cliente
+    @Transactional
+    public ClienteResponseDTO atualizaDadosCliente(int idCliente, ClienteAtualizarDadosRequestDTO dto){
+
+        //Dando erro 500 (cpf invalido por algum motivo)
+
+        ClienteModel cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ObjectNotFoundException("Cliente com o id: " + idCliente + " não encontrado." ));
+
+        if(clienteRepository.existsByEmail(dto.email())){
+            throw new ConstraintException("O email: '" + dto.email() + "' já está em uso.");
+        }
+
+        cliente.setNome(dto.nome());
+        cliente.setTelefone(dto.telefone());
+        cliente.setEmail(dto.email());
+
+        clienteRepository.save(cliente);
+
+        ClienteResponseDTO responseDTO = new ClienteResponseDTO();
+        responseDTO.setId(cliente.getId());
+        responseDTO.setCpf(mascararCPF(cliente.getCpf()));
+        responseDTO.setNome(cliente.getNome());
+        responseDTO.setTelefone(cliente.getTelefone());
+        responseDTO.setEmail(cliente.getEmail());
+
+
+        System.out.println(cliente);
+
+
+        return responseDTO;
+
     }
 
 
