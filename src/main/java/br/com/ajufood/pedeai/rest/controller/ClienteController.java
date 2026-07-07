@@ -1,5 +1,7 @@
 package br.com.ajufood.pedeai.rest.controller;
 
+import br.com.ajufood.pedeai.rest.dto.request.ClienteAtualizarDadosRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
@@ -119,6 +121,25 @@ public class ClienteController {
         );
 
         return ResponseEntity.ok(clienteService.buscarHistoricoPorCliente(id, status, pageable));
+    }
+
+    @Operation(summary = "Cadastra cliente com um endereço associado")
+    @ApiResponse(responseCode = "201", description = "Cliente + Endereço cadastrado com sucesso")
+    @PostMapping("/criar-cliente-endereco")
+    public ResponseEntity<ClienteResponseDTO> criarClienteComEndereco(@Valid @RequestBody ClienteEnderecoRequestDTO dto){
+        ClienteResponseDTO clienteResponseDTO = clienteService.criarClienteComEndereco(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteResponseDTO);
+    }
+
+
+    // UC 08 - Atualizar Dados do Cliente
+    @Operation(summary = "Atualiza os dados de um cliente")
+    @PatchMapping("/{idCliente}")
+    public ResponseEntity<ClienteResponseDTO> atualizaDadosCliente(
+            @PathVariable int idCliente,
+            @RequestBody ClienteAtualizarDadosRequestDTO dto){
+        return ResponseEntity.ok(clienteService.atualizaDadosCliente(idCliente, dto));
 
     }
+
 }

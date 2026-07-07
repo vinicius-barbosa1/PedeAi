@@ -4,9 +4,14 @@ import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.ClienteModel;
+import br.com.ajufood.pedeai.model.EnderecoModel;
 import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
+import br.com.ajufood.pedeai.repositoty.EnderecoRepository;
+import br.com.ajufood.pedeai.rest.dto.request.ClienteAtualizarDadosRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +52,13 @@ public class ClienteService {
 
     @Autowired
     private ProdutoService produtoService;
+
+//    @Autowired
+//    private EnderecoService enderecoService;
+
+
+    @Autowired
+    private EnderecoRepository enderecoRepository;
 
     /**
      * Busca um cliente pelo ID.
@@ -199,6 +212,95 @@ public class ClienteService {
         return pedidoResumo;
 
     }
+
+
+    // Semana 02 - Médio - Cadastrar Cliente com endereço
+    @Transactional
+    public ClienteResponseDTO criarClienteComEndereco(ClienteEnderecoRequestDTO dto) {
+
+        try {
+
+            EnderecoModel endereco = new EnderecoModel();
+            endereco.setEndereco(dto.getEndereco());
+            endereco.setNumero(dto.getNumero());
+            endereco.setComplemento(dto.getComplemento());
+            endereco.setBairro(dto.getBairro());
+            endereco.setCidade(dto.getCidade());
+            endereco.setEstado(dto.getEstado());
+            endereco.setCep(dto.getCep());
+
+            ClienteModel cliente = new ClienteModel();
+            cliente.setNome(dto.getNome());
+            cliente.setCpf(dto.getCpf());
+            cliente.setEmail(dto.getEmail());
+            cliente.setTelefone(dto.getTelefone());
+
+            cliente.setEnderecos(new ArrayList<>());
+            cliente.getEnderecos().add(endereco);
+
+            endereco.setCliente(cliente);
+
+            ClienteModel clienteSalvo = clienteRepository.save(cliente);
+
+            ClienteResponseDTO clienteResponseDTO = modelMapper.map(clienteSalvo, ClienteResponseDTO.class);
+            clienteResponseDTO.setCpf(mascararCPF(clienteSalvo.getCpf()));
+            return clienteResponseDTO;
+
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException(
+                    "Erro de integridade ao salvar o cliente " + dto.getNome() + ".", e
+            );
+        }
+    }
+
+
+    // UC 08 - Atualizar Dados do Cliente
+    @Transactional
+    public ClienteResponseDTO atualizaDadosCliente(int idCliente, ClienteAtualizarDadosRequestDTO dto){
+
+        //Dando erro 500 (cpf invalido por algum motivo)
+
+        ClienteModel cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ObjectNotFoundException("Cliente com o id: " + idCliente + " não encontrado." ));
+
+        if(clienteRepository.existsByEmail(dto.email())){
+            throw new ConstraintException("O email: '" + dto.email() + "' já está em uso.");
+        }
+
+        cliente.setNome(dto.nome());
+        cliente.setTelefone(dto.telefone());
+        cliente.setEmail(dto.email());
+
+        clienteRepository.save(cliente);
+
+        ClienteResponseDTO responseDTO = new ClienteResponseDTO();
+        responseDTO.setId(cliente.getId());
+        responseDTO.setCpf(mascararCPF(cliente.getCpf()));
+        responseDTO.setNome(cliente.getNome());
+        responseDTO.setTelefone(cliente.getTelefone());
+        responseDTO.setEmail(cliente.getEmail());
+
+
+        System.out.println(cliente);
+
+
+        return responseDTO;
+
+    }
+
+
+
+    // Método para mascarar CPF
+    private String mascararCPF(String cpf){
+        StringBuilder sb = new StringBuilder(cpf);
+        sb.insert(3, ".");
+        sb.insert(7, ".");
+        sb.insert(11, "-");
+
+        return sb.toString();
+
+    }
+
 
 
     /**
