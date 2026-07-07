@@ -29,6 +29,19 @@ import java.util.List;
 @Table(name = "cliente")
 public class ClienteModel {
 
+    @Override
+    public String toString() {
+        return "ClienteModel{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", cpf='" + cpf + '\'' +
+                ", email='" + email + '\'' +
+                ", telefone='" + telefone + '\'' +
+                ", enderecos=" + enderecos +
+                ", pedidos=" + pedidos +
+                '}';
+    }
+
     /**
      * Identificador único do cliente.
      *

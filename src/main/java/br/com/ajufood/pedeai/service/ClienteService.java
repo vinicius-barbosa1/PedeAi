@@ -274,11 +274,15 @@ public class ClienteService {
         clienteRepository.save(cliente);
 
         ClienteResponseDTO responseDTO = new ClienteResponseDTO();
-        responseDTO.setNome(dto.nome());
-        responseDTO.setTelefone(dto.telefone());
-        responseDTO.setEmail(dto.email());
         responseDTO.setId(cliente.getId());
         responseDTO.setCpf(mascararCPF(cliente.getCpf()));
+        responseDTO.setNome(cliente.getNome());
+        responseDTO.setTelefone(cliente.getTelefone());
+        responseDTO.setEmail(cliente.getEmail());
+
+
+        System.out.println(cliente);
+
 
         return responseDTO;
 
