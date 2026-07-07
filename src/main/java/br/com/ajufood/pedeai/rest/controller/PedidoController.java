@@ -1,7 +1,9 @@
 package br.com.ajufood.pedeai.rest.controller;
 
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.response.PedidoFluxoStatus;
 import br.com.ajufood.pedeai.rest.dto.response.PedidoResponseDTO;
+import br.com.ajufood.pedeai.rest.enums.PedidoStatus;
 import br.com.ajufood.pedeai.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -58,5 +60,13 @@ public class PedidoController {
     public ResponseEntity<Void> deletar(@PathVariable Integer id){
         pedidoService.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // UC-09 - Gerenciar Fluxo de Status do Pedido
+    @Operation(summary = "Gerenciar Fluxo de Status do Pedido.")
+    @PatchMapping("/{idPedido}/status")
+    public ResponseEntity<PedidoFluxoStatus> gerenciarPedidoFluxoStatus(int idPedido, PedidoStatus pedidoStatus){
+        PedidoFluxoStatus pedidoFluxoStatus = pedidoService.gerenciarPedidoFluxoStatus(idPedido, pedidoStatus);
+        return ResponseEntity.ok(pedidoFluxoStatus);
     }
 }

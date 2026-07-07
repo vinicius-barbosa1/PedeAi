@@ -1,5 +1,6 @@
 package br.com.ajufood.pedeai.model;
 
+import br.com.ajufood.pedeai.rest.enums.PedidoStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -32,10 +33,11 @@ public class PedidoModel {
   @Column(name = "dataHora", nullable = false)
   private LocalDateTime dataHora;
 
-  @NotBlank(message = "O status do pedido é obrigatório.")
-  @Length(max = 128, message = "O status deve ter no máximo 128 caracteres.")
-  @Column(name = "status", nullable = false, length = 128)
-  private String status;
+  @NotNull(message = "O status do pedido é obrigatório.")
+  //@Length(max = 128, message = "O status deve ter no máximo 128 caracteres.")
+  @Column(name = "status", nullable = false) //, length = 128)
+  @Enumerated(EnumType.STRING)
+  private PedidoStatus status;
 
   @NotNull(message = "O valor total é obrigatório.")
   @DecimalMin(value = "0.00", message = "O valor total não pode ser negativo.")
