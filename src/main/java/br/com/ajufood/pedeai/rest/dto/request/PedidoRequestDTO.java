@@ -1,5 +1,6 @@
 package br.com.ajufood.pedeai.rest.dto.request;
 
+import br.com.ajufood.pedeai.rest.enums.PedidoStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,9 +23,9 @@ public class PedidoRequestDTO {
   @PastOrPresent(message = "A data do pedido não pode ser no futuro.")
   private LocalDateTime dataHora;
 
-  @NotBlank(message = "O status do pedido é obrigatório.")
-  @Length(max = 128, message = "O status deve ter no máximo 128 caracteres.")
-  private String status;
+  @NotNull(message = "O status do pedido é obrigatório.")
+  // @Length(max = 128, message = "O status deve ter no máximo 128 caracteres.")
+  private PedidoStatus status;
 
   @NotNull(message = "O valor total é obrigatório.")
   @DecimalMin(value = "0.00", message = "O valor total não pode ser negativo.")

@@ -8,6 +8,7 @@ import br.com.ajufood.pedeai.repositoty.PedidoRepository;
 import br.com.ajufood.pedeai.rest.dto.projection.RelatorioVendasProjecao;
 import br.com.ajufood.pedeai.rest.dto.request.PedidoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.*;
+import br.com.ajufood.pedeai.rest.enums.PedidoStatus;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +147,7 @@ public class PedidoService {
             }
 
             // Condição para evitar NullPointerException
-            if ("FINALIZADO".equalsIgnoreCase(pedidoExistente.getStatus())) {
+            if ("FINALIZADO".equalsIgnoreCase(String.valueOf(pedidoExistente.getStatus()))) {
                 throw new ConstraintException("Impossível cancelar/excluir um pedido já finalizado.");
             }
 
@@ -177,4 +178,47 @@ public class PedidoService {
                 .map(dado -> modelMapper.map(dado, RelatorioVendasResponse.class))
                 .toList();
     }
+
+    // UC-09 - Gerenciar Fluxo de Status do Pedido
+    @Transactional
+    public PedidoFluxoStatus gerenciarPedidoFluxoStatus(int idPedido, PedidoStatus novoStatus) {
+        PedidoStatus status;
+
+        try {
+            status = novoStatus;
+        } catch (IllegalArgumentException e) {
+            throw new ConstraintException("Status inválido: " + novoStatus);
+        }
+
+        PedidoModel pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        "Pedido com o id: " + idPedido + " não encontrado."));
+
+        PedidoStatus statusAtual = pedido.getStatus();
+
+        if (!statusAtual.podeIrPara(novoStatus)) {
+
+            throw new ConstraintException(
+                    "Não é possível alterar de "
+                            + statusAtual
+                            + " para "
+                            + novoStatus
+            );
+        }
+
+        PedidoFluxoStatus pedidoFluxo = new PedidoFluxoStatus(
+                idPedido,
+                pedido.getStatus(),
+                novoStatus,
+                LocalDate.now()
+        );
+
+        pedido.setStatus(status);
+
+        pedidoRepository.save(pedido);
+
+        return pedidoFluxo;
+
+    }
+
 }
