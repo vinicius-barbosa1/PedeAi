@@ -206,4 +206,6 @@ public interface ClienteRepository extends JpaRepository<ClienteModel, Integer> 
             @Param("status") String status,
             Pageable pageable
     );
+
+
 }

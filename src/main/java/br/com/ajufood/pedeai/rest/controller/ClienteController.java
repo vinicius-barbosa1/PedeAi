@@ -3,7 +3,9 @@ package br.com.ajufood.pedeai.rest.controller;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteAtualizarDadosRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteEnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteRequestDTO;
+import br.com.ajufood.pedeai.rest.dto.request.EnderecoRequestDTO;
 import br.com.ajufood.pedeai.rest.dto.response.ClienteResponseDTO;
+import br.com.ajufood.pedeai.rest.dto.response.EnderecoListaAtualizadaResponseDTO;
 import br.com.ajufood.pedeai.rest.dto.response.PedidoResumoDTO;
 import br.com.ajufood.pedeai.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -140,6 +142,14 @@ public class ClienteController {
             @RequestBody ClienteAtualizarDadosRequestDTO dto){
         return ResponseEntity.ok(clienteService.atualizaDadosCliente(idCliente, dto));
 
+    }
+
+    @Operation(summary = "Adicionar Endereco ao Cliente")
+    @PostMapping("{idCliente}/enderecos")
+    public ResponseEntity<EnderecoListaAtualizadaResponseDTO> adicionarEnderecoCliente(@PathVariable int idCliente,
+                                                                                       @Valid @RequestBody EnderecoRequestDTO dto,
+                                                                                       boolean padrao){
+       return ResponseEntity.ok(clienteService.adicionarEnderecoCliente(idCliente, dto, padrao));
     }
 
 }

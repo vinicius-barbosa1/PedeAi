@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
@@ -51,6 +52,10 @@ public class EnderecoModel {
   @Column(name = "cep", nullable = true, length = 8)
   @Length(min = 8, max = 8, message = "O cep deverá ter obrigatoriamente 8 caracteres")
   private String cep;
+
+  @ColumnDefault("true") // define como true por padrão
+  @Column(name = "padrao")
+  private boolean padrao;
 
   @ManyToOne(fetch = FetchType.EAGER) //Carrega todos os endereços do cliente de uma vez.
   @JoinColumn(name = "cliente_id", nullable = false)
