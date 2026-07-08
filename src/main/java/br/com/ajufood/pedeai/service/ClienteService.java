@@ -1,11 +1,11 @@
 package br.com.ajufood.pedeai.service;
 
+import br.com.ajufood.pedeai.exception.BusinessRuleException;
 import br.com.ajufood.pedeai.exception.ConstraintException;
 import br.com.ajufood.pedeai.exception.DataIntegrityException;
 import br.com.ajufood.pedeai.exception.ObjectNotFoundException;
 import br.com.ajufood.pedeai.model.ClienteModel;
 import br.com.ajufood.pedeai.model.EnderecoModel;
-import br.com.ajufood.pedeai.model.PedidoModel;
 import br.com.ajufood.pedeai.repositoty.ClienteRepository;
 import br.com.ajufood.pedeai.repositoty.EnderecoRepository;
 import br.com.ajufood.pedeai.rest.dto.request.ClienteAtualizarDadosRequestDTO;
@@ -286,6 +286,39 @@ public class ClienteService {
 
         return responseDTO;
 
+    }
+
+    // UC 12 - Adicionar Endereco ao Cliente
+    @Transactional
+    public EnderecoListaAtualizadaResponseDTO adicionarEnderecoCliente(int idCliente, EnderecoRequestDTO dto, boolean padrao) {
+        ClienteModel cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new ObjectNotFoundException("O cliente com o id: " + idCliente + " não encontrado."));
+
+        if (enderecoRepository.countByCliente(cliente) == 5) {
+            throw new BusinessRuleException("Cada cliente deverá ter até 5 endereços.");
+        }
+
+        if (enderecoRepository.existsByClienteAndEnderecoAndCepAndNumero(cliente, dto.getEndereco(), dto.getCep(), dto.getNumero())) {
+            throw new BusinessRuleException("Este endereço já existe para esse usuário.");
+        }
+
+        if (padrao) {
+            cliente.getEnderecos().forEach(enderecoModel -> enderecoModel.setPadrao(false));
+        }
+
+        EnderecoModel novoEndereco = modelMapper.map(dto, EnderecoModel.class);
+        novoEndereco.setPadrao(padrao);
+        novoEndereco.setCliente(cliente);
+
+        enderecoRepository.save(novoEndereco);
+
+
+        List<EnderecoResponseDTO> enderecos = cliente.getEnderecos()
+                .stream()
+                .map(endereco -> modelMapper.map(endereco, EnderecoResponseDTO.class))
+                .toList();
+
+        return new EnderecoListaAtualizadaResponseDTO(enderecos);
     }
 
 
